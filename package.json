@@ -1,0 +1,68 @@
+{
+  "name": "@machfivetechchicago/machvive-neodigm55-ux",
+  "version": "0.1.0",
+  "description": "Neodigm 55 as dependency-free Web Components — a page-level choreographer that moves colour and attention across every themed element, plus the components it conducts.",
+  "keywords": [
+    "web-components",
+    "webcomponents",
+    "custom-elements",
+    "ux",
+    "ui",
+    "design-system",
+    "theme",
+    "toast",
+    "snackbar",
+    "neodigm",
+    "no-dependencies",
+    "esm"
+  ],
+  "type": "module",
+  "main": "index.js",
+  "module": "index.js",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./conductor": {
+      "types": "./src/conductor/index.d.ts",
+      "default": "./src/conductor/index.js"
+    },
+    "./toast": {
+      "types": "./src/wc/neodigm-toast/neodigm-toast.d.ts",
+      "default": "./src/wc/neodigm-toast/neodigm-toast.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": true,
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "src"
+  ],
+  "scripts": {
+    "test": "node --test --import ./test/setup.js \"test/*.test.js\"",
+    "test:watch": "node --test --watch --import ./test/setup.js \"test/*.test.js\"",
+    "prepublishOnly": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mach-Five-Group/machvive-neodigm55-ux.git"
+  },
+  "homepage": "https://github.com/Mach-Five-Group/machvive-neodigm55-ux#readme",
+  "bugs": {
+    "url": "https://github.com/Mach-Five-Group/machvive-neodigm55-ux/issues"
+  },
+  "author": "MachFiveTech Chicago",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1"
+  }
+}
