@@ -47,12 +47,20 @@ describe('parsing', () => {
     assert.equal(plainText('Shipping [brand]free[/brand] today'), 'Shipping free today');
   });
 
-  test('characters outside the basic plane survive the split', () => {
-    // The rotation spreads the string; a naive split would tear surrogate pairs
-    // and render replacement characters.
-    const cells = parseRuns('a🟧b');
-    assert.equal(cells.length, 3);
-    assert.equal(cells[1].char, '🟧');
+  test('characters outside the basic plane survive the split, themed or not', () => {
+    // The rotation treats the text as an array of characters; splitting by code
+    // unit would tear surrogate pairs and render replacement characters once a
+    // rotation landed between the halves. Both branches of the parser are
+    // exercised, because a mutation that broke only the themed one survived a
+    // test that checked the plain one.
+    const plain = parseRuns('a🟧b');
+    assert.equal(plain.length, 3);
+    assert.equal(plain[1].char, '🟧');
+
+    const themed = parseRuns('[brand]🟧🟦[/brand]');
+    assert.equal(themed.length, 2, 'an emoji inside a run is one cell, not two');
+    assert.deepEqual(themed.map((c) => c.char), ['🟧', '🟦']);
+    assert.deepEqual(themed.map((c) => c.theme), ['brand', 'brand']);
   });
 });
 

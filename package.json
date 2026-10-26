@@ -1,7 +1,7 @@
 {
   "name": "@machfivetechchicago/machvive-neodigm55-ux",
   "version": "0.1.0",
-  "description": "Neodigm 55 as dependency-free Web Components — a page-level choreographer that moves colour and attention across every themed element, plus the components it conducts.",
+  "description": "Neodigm 55 as dependency-free Web Components \u2014 a page-level choreographer that moves colour and attention across every themed element, plus the components it conducts.",
   "keywords": [
     "web-components",
     "webcomponents",
@@ -32,6 +32,10 @@
     "./toast": {
       "types": "./src/wc/neodigm-toast/neodigm-toast.d.ts",
       "default": "./src/wc/neodigm-toast/neodigm-toast.js"
+    },
+    "./marquee": {
+      "types": "./src/wc/neodigm-marquee/neodigm-marquee.d.ts",
+      "default": "./src/wc/neodigm-marquee/neodigm-marquee.js"
     },
     "./package.json": "./package.json"
   },

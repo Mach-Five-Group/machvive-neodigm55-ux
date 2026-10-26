@@ -8,8 +8,10 @@
  * DOM dependency and loads in bare Node.
  */
 import { NeodigmToast, DEFAULT_DURATION } from './src/wc/neodigm-toast/neodigm-toast.js';
+import { NeodigmMarquee, DEFAULT_SPEED, parseRuns, plainText } from './src/wc/neodigm-marquee/neodigm-marquee.js';
 
 export { NeodigmToast, DEFAULT_DURATION };
+export { NeodigmMarquee, DEFAULT_SPEED, parseRuns, plainText };
 export {
   THEMES, THEME_NAMES, OPT_OUT, THEME_ATTR, PULSE_ATTR,
   themeCss, installTheme, resolveTheme,
