@@ -127,6 +127,33 @@ describe('the headless boundary', () => {
   });
 });
 
+describe('what ships', () => {
+  test('no source file carries an invisible control character', () => {
+    // This package documents and replaces a colour mechanism built from
+    // zero-width and bidi control characters, so those characters turn up in
+    // comments and tests constantly. Two of them reached a shipped source file
+    // while this very component was being written: U+2028 LINE SEPARATOR is a
+    // line terminator in JavaScript and broke the file outright, and U+202A
+    // LEFT-TO-RIGHT EMBEDDING reorders whatever follows it. Name them, never
+    // paste them.
+    const INVISIBLE = new RegExp(
+      '[\\u200B-\\u200F\\u2028\\u2029\\u202A-\\u202E\\u2060-\\u2064\\u206A-\\u206F\\uFEFF]');
+    const sources = [
+      'index.js',
+      'src/conductor/theme.js', 'src/conductor/motion.js',
+      'src/conductor/choreography.js', 'src/conductor/index.js',
+      'src/wc/neodigm-toast/neodigm-toast.js',
+      'src/wc/neodigm-marquee/neodigm-marquee.js'
+    ];
+    for (const file of sources) {
+      const text = readFileSync(new URL(file, root), 'utf8');
+      const hit = text.match(INVISIBLE);
+      assert.equal(hit, null,
+        `${file} contains U+${hit ? hit[0].codePointAt(0).toString(16).toUpperCase().padStart(4, '0') : ''}`);
+    }
+  });
+});
+
 describe('the theme contract', () => {
   test('every component stylesheet themes from the host attribute, not a hardcoded hex', async () => {
     // The sweep sets `data-n55-theme` on a host; a component that painted a
