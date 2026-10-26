@@ -2,4 +2,6 @@ export { NeodigmToast, DEFAULT_DURATION } from './src/wc/neodigm-toast/neodigm-t
 export type { ToastOptions, QueuedToast } from './src/wc/neodigm-toast/neodigm-toast.js';
 export { NeodigmMarquee, DEFAULT_SPEED, parseRuns, plainText } from './src/wc/neodigm-marquee/neodigm-marquee.js';
 export type { MarqueeCell } from './src/wc/neodigm-marquee/neodigm-marquee.js';
+export { NeodigmTulip, TULIP_DEFAULTS, readConfig, configFrom } from './src/wc/neodigm-tulip/neodigm-tulip.js';
+export type { TulipConfig } from './src/wc/neodigm-tulip/neodigm-tulip.js';
 export * from './src/conductor/index.js';

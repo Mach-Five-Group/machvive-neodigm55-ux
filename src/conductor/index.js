@@ -19,3 +19,5 @@ export {
 export {
   robinTheme, pulseTheme, flashTitle, resetTitle
 } from './choreography.js';
+
+export { place, rectOf } from './anchor.js';

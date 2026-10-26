@@ -37,6 +37,10 @@
       "types": "./src/wc/neodigm-marquee/neodigm-marquee.d.ts",
       "default": "./src/wc/neodigm-marquee/neodigm-marquee.js"
     },
+    "./tulip": {
+      "types": "./src/wc/neodigm-tulip/neodigm-tulip.d.ts",
+      "default": "./src/wc/neodigm-tulip/neodigm-tulip.js"
+    },
     "./package.json": "./package.json"
   },
   "sideEffects": true,

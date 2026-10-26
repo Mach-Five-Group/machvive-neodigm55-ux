@@ -9,9 +9,11 @@
  */
 import { NeodigmToast, DEFAULT_DURATION } from './src/wc/neodigm-toast/neodigm-toast.js';
 import { NeodigmMarquee, DEFAULT_SPEED, parseRuns, plainText } from './src/wc/neodigm-marquee/neodigm-marquee.js';
+import { NeodigmTulip, TULIP_DEFAULTS, readConfig, configFrom } from './src/wc/neodigm-tulip/neodigm-tulip.js';
 
 export { NeodigmToast, DEFAULT_DURATION };
 export { NeodigmMarquee, DEFAULT_SPEED, parseRuns, plainText };
+export { NeodigmTulip, TULIP_DEFAULTS, readConfig, configFrom };
 export {
   THEMES, THEME_NAMES, OPT_OUT, THEME_ATTR, PULSE_ATTR,
   themeCss, installTheme, resolveTheme,
