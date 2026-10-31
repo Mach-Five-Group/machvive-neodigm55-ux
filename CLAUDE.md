@@ -165,8 +165,8 @@ not just the pass count.
 Releases publish from CI over OIDC. No token exists, and none should be created.
 
 ```bash
-npm version <patch|minor|major>
-git commit -am "…" && git tag -a v<x.y.z> -m "…"
+git commit -am "…"                  # npm version refuses a dirty tree
+npm version <patch|minor|major>     # bumps, commits, and creates annotated tag v<x.y.z>
 git push origin main --follow-tags
 ```
 

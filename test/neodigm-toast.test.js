@@ -199,3 +199,86 @@ describe('page choreography', () => {
     assert.equal(text(el), 'two', 'the second message should already be up');
   });
 });
+
+describe('the progress bar', () => {
+  const bar = (el) => el.shadowRoot.querySelector('.bar');
+
+  test('runs for the toast\'s own duration, not a fixed 5.2s', () => {
+    // The original's bar was a 5.2s transition whatever the toast's duration,
+    // so a short toast closed with its bar barely started.
+    const el = mount();
+    el.show('Saved', { duration: 1500 });
+    assert.equal(bar(el)?.style.animationDuration, '1500ms');
+  });
+
+  test('defaults to the default duration', () => {
+    const el = mount();
+    el.show('Saved');
+    assert.equal(bar(el)?.style.animationDuration, `${DEFAULT_DURATION}ms`);
+  });
+
+  test('each queued message gets a fresh bar, which restarts the animation', async () => {
+    const el = mount();
+    el.show('one', { duration: 10 }).show('two', { duration: 30 });
+    const first = bar(el);
+    await settle(1260);
+    assert.equal(text(el), 'two');
+    assert.notEqual(bar(el), first, 'the same element would not restart its animation');
+    assert.equal(bar(el).style.animationDuration, '30ms');
+    assert.equal(el.shadowRoot.querySelectorAll('.bar').length, 1, 'old bars are removed');
+  });
+
+  test('is left out when motion is off', () => {
+    setMotionAllowed(false);
+    const el = mount();
+    el.show('Saved');
+    assert.equal(bar(el), null);
+  });
+
+  test('the entry bounces and the bar fills, unless the OS asks for less motion', () => {
+    const el = mount();
+    const css = el.shadowRoot.querySelector('style').textContent;
+    assert.match(css, /:host\(\[open\]\)\s*\{[^}]*animation:\s*n55-toast-in/);
+    assert.match(css, /@keyframes n55-toast-in[\s\S]*80%[^}]*translateY\(-\d+px\)/, 'it overshoots before settling');
+    const reduced = css.slice(css.indexOf('prefers-reduced-motion'));
+    assert.match(reduced, /:host\(\[open\]\)\s*\{[^}]*animation:\s*none/);
+    assert.match(reduced, /\.bar\s*\{\s*display:\s*none/);
+  });
+});
+
+describe('the legacy look', () => {
+  const css = () => mount().shadowRoot.querySelector('style').textContent;
+
+  test('every theme is a gradient from its colour to its deep companion', () => {
+    for (const name of ['brand', 'danger', 'night', 'party']) {
+      assert.match(css(), new RegExp(
+        `\\[${THEME_ATTR}="${name}"\\]\\)\\s*\\{\\s*background:\\s*linear-gradient\\(45deg, var\\(--n55-${name}\\), var\\(--n55-${name}-deep\\)\\)`
+      ), `${name} is not a light-to-deep gradient`);
+    }
+  });
+
+  test('the text is white and cannot be selected', () => {
+    const host = css().match(/:host \{[\s\S]*?\n  \}/)[0];
+    assert.match(host, /\n\s*color: #fff;/);
+    assert.match(host, /\n\s*user-select: none;/);
+    assert.doesNotMatch(css(), new RegExp(`\\[${THEME_ATTR}="brand"\\]\\)\\s*\\{[^}]*color:`), 'a theme must not override the white');
+  });
+});
+
+describe('the progress bar colour', () => {
+  test('runs dark to light, the reverse of the background', () => {
+    const css = mount().shadowRoot.querySelector('style').textContent;
+    for (const name of ['brand', 'danger', 'night', 'party']) {
+      assert.match(css, new RegExp(
+        `\\[${THEME_ATTR}="${name}"\\]\\) \\.bar\\s*\\{\\s*background:\\s*linear-gradient\\(90deg, var\\(--n55-${name}-deep\\), var\\(--n55-${name}\\)\\)`
+      ), `${name}'s bar is not a deep-to-light gradient`);
+    }
+  });
+
+  test('white, whose two colours are both white, still shows a bar', () => {
+    const css = mount().shadowRoot.querySelector('style').textContent;
+    const at = css.lastIndexOf(`[${THEME_ATTR}="white"]) .bar`);
+    assert.ok(at > css.indexOf(`[${THEME_ATTR}="white"]) .bar`), 'the override must come after the generated rule');
+    assert.match(css.slice(at), /^\[[^\]]+\]\) \.bar \{ background: currentColor; \}/);
+  });
+});

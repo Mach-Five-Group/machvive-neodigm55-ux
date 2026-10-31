@@ -50,10 +50,17 @@ const STYLES = `
 
     max-width: min(92vw, 560px);
     box-sizing: border-box;
-    padding: 14px 20px;
+    /* Clips the progress bar to the rounded corners. */
+    overflow: hidden;
+    padding: 18px;
     border-radius: 8px;
-    font: 15px/1.45 system-ui, sans-serif;
+    /* The original's type, white on every theme but the two light ones below.
+       A faint shadow keeps it legible at the light end of the gradient. */
+    font: 18px/1.4 'Helvetica', 'Helvetica Neue', sans-serif;
+    text-shadow: 0 1px 2px rgb(0 0 0 / .35);
     text-align: center;
+    user-select: none;
+    -webkit-user-select: none;
     box-shadow: 0 6px 24px rgb(0 0 0 / .28);
 
     /* The unthemed default, for a page that imported the toast but never called
@@ -61,21 +68,46 @@ const STYLES = `
        night-deep here would mean the two drift apart the first time anyone edits
        the palette, and nothing would fail. Both sides are declared so the toast
        never inherits a page colour it cannot guarantee contrast against. */
-    background: var(--n55-night-deep, #2b2b2b);
-    color: var(--n55-white, #fff);
+    background: linear-gradient(45deg, var(--n55-night, #2b2b2b), var(--n55-night-deep, #2b2b2b));
+    color: #fff;
   }
 
   :host([open]) {
     opacity: 1;
     visibility: visible;
     transform: translateX(-50%) translateY(0);
+    animation: n55-toast-in .5s ease-in-out;
   }
+
+  /* From the original's toast_bottom: rise from below the fold, overshoot,
+     settle back. Entry only — leaving is the plain transition above. */
+  @keyframes n55-toast-in {
+    0%   { transform: translateX(-50%) translateY(136px); }
+    80%  { transform: translateX(-50%) translateY(-6px); }
+    100% { transform: translateX(-50%) translateY(0); }
+  }
+
+  /* Time remaining, filling left to right across the top over the toast's own
+     duration, which #next() writes onto it. The original fixed this at 5.2s
+     whatever the toast's duration. Like the original it runs dark to light,
+     the reverse of the background; each theme's colours are set below. */
+  .bar {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    block-size: 3px;
+    inline-size: 0;
+    background: linear-gradient(90deg, var(--n55-night-deep, #2b2b2b), var(--n55-night, #2b2b2b));
+    animation: n55-toast-bar linear forwards;
+  }
+  @keyframes n55-toast-bar { to { inline-size: 100%; } }
 
   /* A visitor who asked for less motion still gets the toast — it carries
      information — but it appears rather than slides. */
   @media (prefers-reduced-motion: reduce) {
     :host { transition: opacity .01s linear; transform: translateX(-50%); }
-    :host([open]) { transform: translateX(-50%); }
+    :host([open]) { transform: translateX(-50%); animation: none; }
+    .bar { display: none; }
   }
 
   :host([hidden]) { display: none; }
@@ -85,13 +117,18 @@ const STYLES = `
      and silently missed here. */
   ${Object.keys(THEMES).map((name) => `
   :host([${THEME_ATTR}="${name}"]) {
-    background: var(--n55-${name});
-    color: var(--n55-${name}-deep);
+    background: linear-gradient(45deg, var(--n55-${name}), var(--n55-${name}-deep));
+  }
+  :host([${THEME_ATTR}="${name}"]) .bar {
+    background: linear-gradient(90deg, var(--n55-${name}-deep), var(--n55-${name}));
   }`).join('')}
 
-  /* ghost and white are light backgrounds; their -deep value is the readable ink. */
+  /* white and ghost start from pure white, where white text would vanish. The
+     original never styled a toast for either; dark ink is the readable choice. */
   :host([${THEME_ATTR}="white"]),
-  :host([${THEME_ATTR}="ghost"]) { color: #1a1a1a; }
+  :host([${THEME_ATTR}="ghost"]) { color: #1a1a1a; text-shadow: none; }
+  /* white's two colours are both white, so its bar would vanish too. */
+  :host([${THEME_ATTR}="white"]) .bar { background: currentColor; }
 
   .msg { margin: 0; }
   .msg b { font-weight: 600; }
@@ -197,6 +234,7 @@ export class NeodigmToast extends HTMLElement {
     this.#showing = true;
 
     this.#render(entry.message);
+    this.#progress(entry.duration);
     if (entry.theme) this.setAttribute(THEME_ATTR, entry.theme);
     this.setAttribute('open', '');
     this.dispatchEvent(new CustomEvent('neodigm-toast-show', {
@@ -216,6 +254,21 @@ export class NeodigmToast extends HTMLElement {
     // then there is no transition to wait for.
     const gap = motionAllowed() ? GAP : 0;
     this.#timer = setTimeout(() => this.#next(), gap);
+  }
+
+  /**
+   * Replaces the progress bar with a fresh one, which is what restarts its CSS
+   * animation for each queued message. Left out entirely when motion is off: a
+   * moving bar is motion, and the toast still closes on time without it.
+   */
+  #progress(duration) {
+    this.shadowRoot.querySelector('.bar')?.remove();
+    if (!motionAllowed()) return;
+    const bar = this.ownerDocument.createElement('span');
+    bar.className = 'bar';
+    bar.setAttribute('part', 'progress');
+    bar.style.animationDuration = `${duration}ms`;
+    this.shadowRoot.append(bar);
   }
 
   /**
