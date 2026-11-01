@@ -11,13 +11,24 @@
  * follows, with no rebuild and no component aware it happened.
  *
  * Each theme carries three values, matching the original's `[light, dark, glyph]`
- * triple:
- *   --n55-<name>        the colour
- *   --n55-<name>-deep   its darker companion, for text on the colour or hover
- *   --n55-<name>-glyph  the emoji the tab title flashes (see flashTitle)
+ * triple, plus two inks derived from them:
+ *   --n55-<name>           the colour
+ *   --n55-<name>-deep      its darker companion, for a second surface or hover
+ *   --n55-<name>-glyph     the emoji the tab title flashes (see flashTitle)
+ *   --n55-<name>-ink       text on the colour
+ *   --n55-<name>-deep-ink  text on the deep companion
+ *
+ * The inks exist because `-deep` was used as text on the colour, and measured
+ * that falls below WCAG AA (4.5:1) on twelve of the thirteen themes — party
+ * manages 1.76. Each ink is whichever of two neutrals contrasts more with its
+ * surface, computed rather than hand-picked so a custom palette gets readable
+ * text without anyone measuring it.
  */
 
-/** @typedef {{ color: string, deep: string, glyph: string }} NeodigmTheme */
+/**
+ * @typedef {{ color: string, deep: string, glyph: string,
+ *   ink?: string, deepInk?: string }} NeodigmTheme
+ */
 
 /**
  * Ported verbatim from `N55_THEME_COLORS` so an existing page's colours do not
@@ -41,6 +52,83 @@ export const THEMES = Object.freeze({
   marcom:    { color: '#B163A3', deep: '#5F4B8B', glyph: '🟪' },
   party:     { color: '#FF6F61', deep: '#C93F60', glyph: '🟪' }
 });
+
+/** The two inks a surface can take: the components' neutral dark, and white. */
+export const INK_DARK = '#1a1a1a';
+export const INK_LIGHT = '#fff';
+
+/** WCAG relative luminance of `#rgb` or `#rrggbb`; null for anything else. */
+function luminance(hex) {
+  const m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(String(hex).trim());
+  if (!m) return null;
+  const h = m[1].length === 3 ? [...m[1]].map((c) => c + c).join('') : m[1];
+  const [r, g, b] = [0, 2, 4].map((i) => {
+    const v = parseInt(h.slice(i, i + 2), 16) / 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/**
+ * WCAG contrast ratio between two hex colours, 1 to 21. Pure, so a theme
+ * builder or a CI check can audit a palette with no DOM. NaN if either is not
+ * a hex colour.
+ */
+export function contrast(a, b) {
+  const [la, lb] = [luminance(a), luminance(b)];
+  if (la === null || lb === null) return NaN;
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
+/**
+ * The readable ink for text on `surface`: INK_DARK or INK_LIGHT, whichever
+ * contrasts more. A surface that is not a hex colour gets INK_DARK — there is
+ * nothing to measure, so the palette author should pass `ink` explicitly.
+ */
+export function inkFor(surface) {
+  const dark = contrast(INK_DARK, surface);
+  if (Number.isNaN(dark)) return INK_DARK;
+  return contrast(INK_LIGHT, surface) > dark ? INK_LIGHT : INK_DARK;
+}
+
+/**
+ * The page's own surfaces, as opposed to a theme's: what a component paints
+ * when it is not wearing a theme. Each is a `[light, dark]` pair, emitted as
+ * `light-dark(light, dark)`.
+ *
+ * That function resolves on the element that *uses* the variable, against the
+ * `color-scheme` that element inherits — and `color-scheme` inherits through a
+ * shadow boundary just as custom properties do. So every instance works out
+ * its own mode where it stands, with no listener and no JavaScript: a dark
+ * sidebar in a light page needs nothing but `color-scheme: dark` on the
+ * sidebar. A browser without `light-dark()` drops the declaration and the
+ * component's own `var()` fallback — the light value — applies.
+ *
+ *   --n55-surface          a resting surface, such as Buffet's top row
+ *   --n55-surface-ink      text on it
+ *   --n55-line             hairlines and dividers on it
+ *   --n55-inverse          the emphasis surface when there is no theme
+ *   --n55-inverse-ink      text on that
+ */
+export const NEUTRALS = Object.freeze({
+  surface:      ['#fff', '#1a1a1a'],
+  surfaceInk:   ['#1a1a1a', '#fff'],
+  line:         ['rgb(0 0 0 / .12)', 'rgb(255 255 255 / .16)'],
+  inverse:      ['#1a1a1a', '#e8e8e8'],
+  inverseInk:   ['#fff', '#1a1a1a']
+});
+
+/**
+ * The attribute that pins a subtree to light or dark: `data-n55-scheme="dark"`
+ * on `<html>`, a section, or a single component. Without it, components follow
+ * whatever `color-scheme` the page already sets — `light dark` follows the OS.
+ * The palette deliberately does not set `color-scheme` on `:root` itself: that
+ * also restyles the page's own scrollbars and form controls, which is the
+ * page's decision.
+ */
+export const SCHEME_ATTR = 'data-n55-scheme';
+
+const kebab = (key) => key.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
 
 /** Theme names in round-robin order. */
 export const THEME_NAMES = Object.freeze(Object.keys(THEMES));
@@ -68,15 +156,22 @@ export const PULSE_ATTR = 'data-n55-theme-pulse';
  * @param {Record<string, NeodigmTheme>} [themes]
  * @param {string} [selector] Where to hang the variables. A section-scoped
  *   selector gives that subtree its own palette, since custom properties cascade.
+ * @param {Record<string, [string, string]>} [neutrals] `[light, dark]` pairs.
  * @returns {string}
  */
-export function themeCss(themes = THEMES, selector = ':root') {
+export function themeCss(themes = THEMES, selector = ':root', neutrals = NEUTRALS) {
   const lines = Object.entries(themes).flatMap(([name, t]) => [
     `  --n55-${name}: ${t.color};`,
     `  --n55-${name}-deep: ${t.deep};`,
-    `  --n55-${name}-glyph: "${t.glyph}";`
+    `  --n55-${name}-glyph: "${t.glyph}";`,
+    `  --n55-${name}-ink: ${t.ink ?? inkFor(t.color)};`,
+    `  --n55-${name}-deep-ink: ${t.deepInk ?? inkFor(t.deep)};`
   ]);
-  return `${selector} {\n${lines.join('\n')}\n}\n`;
+  const surfaces = Object.entries(neutrals).map(([key, [light, dark]]) =>
+    `  --n55-${kebab(key)}: light-dark(${light}, ${dark});`);
+  return `${selector} {\n${[...lines, ...surfaces].join('\n')}\n}\n` +
+    `[${SCHEME_ATTR}="light"] { color-scheme: light; }\n` +
+    `[${SCHEME_ATTR}="dark"] { color-scheme: dark; }\n`;
 }
 
 /** The id of the stylesheet this installs, so a second call can replace it. */
@@ -88,14 +183,17 @@ const STYLE_ID = 'n55-theme-tokens';
  * Idempotent: calling it again replaces the stylesheet rather than stacking a
  * second one, which is what lets a theme builder preview a palette live.
  *
- * @param {{ themes?: Record<string, NeodigmTheme>, selector?: string, doc?: Document }} [options]
+ * @param {{ themes?: Record<string, NeodigmTheme>, selector?: string,
+ *   neutrals?: Record<string, [string, string]>, doc?: Document }} [options]
  * @returns {HTMLStyleElement|null} null where there is no document.
  */
-export function installTheme({ themes = THEMES, selector = ':root', doc = globalThis.document } = {}) {
+export function installTheme({
+  themes = THEMES, selector = ':root', neutrals = NEUTRALS, doc = globalThis.document
+} = {}) {
   if (!doc?.head) return null;
   const style = doc.getElementById(STYLE_ID) ?? doc.createElement('style');
   style.id = STYLE_ID;
-  style.textContent = themeCss(themes, selector);
+  style.textContent = themeCss(themes, selector, neutrals);
   if (!style.isConnected) doc.head.append(style);
   return style;
 }
@@ -115,13 +213,18 @@ export function installTheme({ themes = THEMES, selector = ':root', doc = global
 export function resolveTheme(name, { doc = globalThis.document } = {}) {
   if (!THEMES[name]) return null;
   const root = doc?.documentElement;
-  if (!root || typeof globalThis.getComputedStyle !== 'function') return THEMES[name];
+  const built = THEMES[name];
+  if (!root || typeof globalThis.getComputedStyle !== 'function') {
+    return { ...built, ink: inkFor(built.color), deepInk: inkFor(built.deep) };
+  }
   const read = (suffix) =>
     globalThis.getComputedStyle(root).getPropertyValue(`--n55-${name}${suffix}`).trim();
   return {
     color: read('') || THEMES[name].color,
     deep: read('-deep') || THEMES[name].deep,
     // The glyph round-trips through CSS as a quoted string.
-    glyph: (read('-glyph') || '').replace(/^["']|["']$/g, '') || THEMES[name].glyph
+    glyph: (read('-glyph') || '').replace(/^["']|["']$/g, '') || THEMES[name].glyph,
+    ink: read('-ink') || inkFor(THEMES[name].color),
+    deepInk: read('-deep-ink') || inkFor(THEMES[name].deep)
   };
 }

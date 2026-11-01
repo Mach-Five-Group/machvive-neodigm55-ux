@@ -1,10 +1,17 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 
 const root = new URL('../', import.meta.url);
 const pkg = JSON.parse(readFileSync(new URL('package.json', root), 'utf8'));
+
+// Found on disk rather than listed by hand. A hand-kept list had already
+// fallen behind: Tulip shipped outside both guards that use this.
+const components = readdirSync(new URL('src/wc/', root))
+  .map((dir) => `src/wc/${dir}/${dir}.js`);
+const conductor = readdirSync(new URL('src/conductor/', root))
+  .filter((f) => f.endsWith('.js')).map((f) => `src/conductor/${f}`);
 
 /**
  * Manifest guards.
@@ -61,6 +68,21 @@ describe('the manifest', () => {
     assert.equal(pkg.license, 'Apache-2.0');
   });
 
+  test('every component is wired into all four places it must appear', () => {
+    // Missing any one breaks either the bulk import or the cherry-pick, and
+    // nothing else fails when it happens.
+    const exported = Object.values(pkg.exports).map((c) => c.default).filter(Boolean);
+    const indexJs = readFileSync(new URL('index.js', root), 'utf8');
+    const indexDts = readFileSync(new URL('index.d.ts', root), 'utf8');
+    for (const file of components) {
+      const dts = file.replace(/\.js$/, '.d.ts');
+      assert.doesNotThrow(() => readFileSync(new URL(dts, root)), `${dts} is missing`);
+      assert.ok(exported.includes(`./${file}`), `${file} has no exports subpath`);
+      assert.ok(indexJs.includes(`./${file}`), `${file} is not imported by index.js`);
+      assert.ok(indexDts.includes(`./${file}`), `${file} is not re-exported by index.d.ts`);
+    }
+  });
+
   test('publishes publicly, which a scoped package needs', () => {
     assert.equal(pkg.publishConfig?.access, 'public');
   });
@@ -86,7 +108,7 @@ describe('the published tarball', () => {
       'index.js', 'index.d.ts', 'LICENSE', 'package.json',
       'src/conductor/index.js', 'src/conductor/theme.js',
       'src/wc/neodigm-toast/neodigm-toast.js',
-      'src/wc/neodigm-toast/neodigm-toast.d.ts'
+      ...components, ...components.map((f) => f.replace(/\.js$/, '.d.ts'))
     ]) {
       assert.ok(files.includes(required), `${required} is not in the tarball`);
     }
@@ -138,13 +160,8 @@ describe('what ships', () => {
     // paste them.
     const INVISIBLE = new RegExp(
       '[\\u200B-\\u200F\\u2028\\u2029\\u202A-\\u202E\\u2060-\\u2064\\u206A-\\u206F\\uFEFF]');
-    const sources = [
-      'index.js',
-      'src/conductor/theme.js', 'src/conductor/motion.js',
-      'src/conductor/choreography.js', 'src/conductor/index.js',
-      'src/wc/neodigm-toast/neodigm-toast.js',
-      'src/wc/neodigm-marquee/neodigm-marquee.js'
-    ];
+    const sources = ['index.js', ...conductor, ...components];
+    assert.ok(components.length >= 4, `found only ${components.join(', ')}`);
     for (const file of sources) {
       const text = readFileSync(new URL(file, root), 'utf8');
       const hit = text.match(INVISIBLE);
@@ -158,16 +175,16 @@ describe('the theme contract', () => {
   test('every component stylesheet themes from the host attribute, not a hardcoded hex', async () => {
     // The sweep sets `data-n55-theme` on a host; a component that painted a
     // literal colour would ignore both the sweep and any page override.
-    const source = readFileSync(
-      new URL('src/wc/neodigm-toast/neodigm-toast.js', root), 'utf8');
-    const styles = source.slice(source.indexOf('const STYLES'), source.indexOf('let delegatedListener'));
-
-    const literals = styles.match(/#[0-9a-fA-F]{3,8}\b/g) ?? [];
+    // The whole file, not just its stylesheet: Buffet builds part of its CSS
+    // in a helper outside STYLES, and a slice would have missed it.
     // Deliberate exceptions, all neutral ink or the unthemed default — none of
     // them a palette value, which is the thing that would drift.
     const allowed = new Set(['#fff', '#1a1a1a', '#2b2b2b']);
-    const unexpected = literals.filter((hex) => !allowed.has(hex.toLowerCase()));
-    assert.deepEqual(unexpected, [],
-      `hardcoded colours bypass the palette: ${unexpected.join(', ')}`);
+    for (const file of components) {
+      const literals = readFileSync(new URL(file, root), 'utf8').match(/#[0-9a-fA-F]{3,8}\b/g) ?? [];
+      const unexpected = literals.filter((hex) => !allowed.has(hex.toLowerCase()));
+      assert.deepEqual(unexpected, [],
+        `${file}: hardcoded colours bypass the palette: ${unexpected.join(', ')}`);
+    }
   });
 });

@@ -12,6 +12,8 @@
     "theme",
     "toast",
     "snackbar",
+    "navigation",
+    "menu",
     "neodigm",
     "no-dependencies",
     "esm"
@@ -40,6 +42,10 @@
     "./tulip": {
       "types": "./src/wc/neodigm-tulip/neodigm-tulip.d.ts",
       "default": "./src/wc/neodigm-tulip/neodigm-tulip.js"
+    },
+    "./buffet": {
+      "types": "./src/wc/neodigm-buffet/neodigm-buffet.d.ts",
+      "default": "./src/wc/neodigm-buffet/neodigm-buffet.js"
     },
     "./package.json": "./package.json"
   },

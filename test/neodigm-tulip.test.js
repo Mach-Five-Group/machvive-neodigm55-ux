@@ -339,3 +339,20 @@ describe('marquee integration', () => {
     assert.equal(tip.shadowRoot.querySelector('neodigm-marquee').getAttribute('text'), '');
   });
 });
+
+describe('theming', () => {
+  test('text is the palette\'s ink on the theme colour, for every theme', async () => {
+    // Was -deep on the colour, below AA on twelve of the thirteen themes, with
+    // a hand-written exception for white and ghost.
+    const { THEMES } = await import('../src/conductor/index.js');
+    const tip = document.createElement('neodigm-tulip');
+    document.body.append(tip);
+    const css = tip.shadowRoot.querySelector('style').textContent;
+    for (const name of Object.keys(THEMES)) {
+      assert.match(css, new RegExp(
+        `\\[${THEME_ATTR}="${name}"\\]\\) \\{\\s*background: var\\(--n55-${name}\\);\\s*color: var\\(--n55-${name}-ink\\);`
+      ), `${name}`);
+    }
+    assert.doesNotMatch(css, /color: var\(--n55-[a-z]+-deep\)/);
+  });
+});

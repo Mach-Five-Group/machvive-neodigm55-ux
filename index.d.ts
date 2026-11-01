@@ -4,4 +4,6 @@ export { NeodigmMarquee, DEFAULT_SPEED, parseRuns, plainText } from './src/wc/ne
 export type { MarqueeCell } from './src/wc/neodigm-marquee/neodigm-marquee.js';
 export { NeodigmTulip, TULIP_DEFAULTS, readConfig, configFrom } from './src/wc/neodigm-tulip/neodigm-tulip.js';
 export type { TulipConfig } from './src/wc/neodigm-tulip/neodigm-tulip.js';
+export { NeodigmBuffet, readItems } from './src/wc/neodigm-buffet/neodigm-buffet.js';
+export type { BuffetItem, BuffetSelection, BuffetSelectDetail } from './src/wc/neodigm-buffet/neodigm-buffet.js';
 export * from './src/conductor/index.js';

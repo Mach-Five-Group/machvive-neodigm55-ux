@@ -109,7 +109,7 @@ const STYLES = `
     text-align: center;
     box-shadow: 0 4px 16px rgb(0 0 0 / .24);
     background: var(--n55-brand, #2b2b2b);
-    color: var(--n55-brand-deep, #fff);
+    color: var(--n55-brand-ink, #fff);
   }
   :host([open]) { opacity: 1; visibility: visible; }
   :host([hidden]) { display: none; }
@@ -122,10 +122,8 @@ const STYLES = `
   ${Object.keys(THEMES).map((name) => `
   :host([${THEME_ATTR}="${name}"]) {
     background: var(--n55-${name});
-    color: var(--n55-${name}-deep);
+    color: var(--n55-${name}-ink);
   }`).join('')}
-  :host([${THEME_ATTR}="white"]),
-  :host([${THEME_ATTR}="ghost"]) { color: #1a1a1a; }
 
   .msg { margin: 0; }
   .icon { margin-inline-end: 6px; font-style: normal; }

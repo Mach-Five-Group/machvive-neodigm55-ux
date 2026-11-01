@@ -74,13 +74,35 @@ is the difference that makes a theme builder possible:
 ```js
 import { installTheme, themeCss } from '@machfivetechchicago/machvive-neodigm55-ux/conductor';
 
-installTheme();                    // --n55-brand, --n55-brand-deep, --n55-brand-glyph, …
+installTheme();                    // --n55-brand, --n55-brand-deep, --n55-brand-ink, …
 themeCss(myPalette, '.promo');     // or emit a stylesheet for a section, or for a build
 ```
 
 Override `--n55-brand` on a page and every component follows, with no rebuild and no
 component aware it happened. `disabled` doubles as the opt-out: an element themed
 `disabled` is never choreographed.
+
+Text on a theme colour uses `--n55-<name>-ink` (and `-deep-ink` on the deep shade):
+near-black or white, whichever contrasts more, computed by `inkFor()` so a custom
+palette stays readable. `contrast()` is exported for auditing a palette in CI.
+
+### Light and dark
+
+Components follow the `color-scheme` they inherit, per instance, with no JavaScript.
+Surfaces that are not a theme colour — Buffet's top row, an unthemed selection — come
+from `--n55-surface`, `--n55-surface-ink`, `--n55-line`, `--n55-inverse` and
+`--n55-inverse-ink`, each a `light-dark()` pair.
+
+```html
+<html style="color-scheme: light dark">        <!-- follow the OS -->
+<html data-n55-scheme="dark">                   <!-- pin the page -->
+<aside data-n55-scheme="dark">                  <!-- or one section -->
+<neodigm-buffet data-n55-scheme="light">        <!-- or one instance -->
+```
+
+The palette never sets `color-scheme` on `:root` itself, because that also restyles
+the page's scrollbars and form controls. Theme colours and their inks are the same in
+both modes.
 
 ## Toast
 
@@ -98,6 +120,35 @@ document.querySelector('neodigm-toast')
 Queued, with the original's debounce — the same message twice in a row is the same
 notification. `|` breaks the line. **Message text is never parsed as HTML**, unlike the
 original's `innerHTML`, because toast text is routinely built from user input.
+
+## Buffet
+
+A full-width, two-level menu driven by metadata. The top row divides its
+container's width evenly; the selection's children sit below at half the height.
+Both levels keep a selection, and each item remembers its last child.
+
+```html
+<neodigm-buffet data-n55-theme="brand" data-n55-buffet='[
+  {"token":"shows","caption":"Shows","selected":true,"secondary":[
+    {"token":"live","caption":"Live"},{"token":"vod","caption":"VOD"}]},
+  {"token":"people","caption":"People","count":3,"theme":"marcom"}
+]'></neodigm-buffet>
+```
+
+```js
+const menu = document.querySelector('neodigm-buffet');
+menu.addEventListener('neodigm-buffet-select', (e) => {
+  if (hasUnsavedWork()) e.preventDefault();      // cancelable, at either level
+  else route(e.detail.primary, e.detail.secondary);
+});
+menu.select('shows', 'vod');                     // sync to a route, silently
+menu.items = relabelled;                         // selection survives where tokens do
+menu.updateCount('people', 4);
+```
+
+The theme on the host colours the whole menu, so a sweep moves across it as one
+instrument. An item's own `theme` is an accent that a sweep does not reach. Height
+is `--n55-buffet-height` (default `64px`). Sticky positioning is left to the page.
 
 ## What changed in the port
 

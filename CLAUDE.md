@@ -66,11 +66,28 @@ a sweep to reach it is the one way to use this wrong, and a test pins it.
 **The palette is CSS custom properties, never hex in JavaScript.** The original kept
 colours in `neodigmOpt.N55_THEME_COLORS`, so a page could not restyle anything
 without touching the bundle. Here `installTheme()` writes `--n55-<name>`,
-`--n55-<name>-deep` and `--n55-<name>-glyph` onto `:root`. Custom properties are the
+`--n55-<name>-deep` and `--n55-<name>-glyph` onto `:root`, plus `--n55-<name>-ink`
+and `--n55-<name>-deep-ink`. Custom properties are the
 one mechanism that both cascades through light DOM *and* inherits through a shadow
 boundary — which is what makes a page-level theme builder possible with no component
-changes and no rebuild. A test strips the known-neutral literals from each
-component's stylesheet and fails on any remaining hex.
+changes and no rebuild. A test scans each component file and fails on any hex
+outside the three known neutrals.
+
+**Text on a theme surface uses its ink, never `-deep`.** `-deep` on the colour
+measured below WCAG AA on twelve of thirteen themes (party: 1.76). Each ink is the
+better of `#1a1a1a` and `#fff` for its surface, computed by `inkFor()` in the
+conductor so a custom palette is readable without anyone measuring it; a theme may
+pass `ink`/`deepInk` explicitly. Toast is the deliberate exception — white on a
+colour-to-deep gradient, where no single ink suits both ends.
+
+**Light and dark are `color-scheme`, resolved per instance.** Non-theme surfaces come
+from `NEUTRALS` in the conductor, emitted as `--n55-surface: light-dark(…, …)` and
+friends. `light-dark()` resolves on the element that uses the variable, against the
+`color-scheme` it inherits — which crosses shadow boundaries — so every instance knows
+its mode with no listener. `data-n55-scheme="light|dark"` pins any subtree. The palette
+must never set `color-scheme` on `:root`; that restyles the host page's own controls.
+jsdom cannot resolve `light-dark()`, so verify rendering in a real browser, and wait
+out the components' 0.2s colour transitions before reading computed colours.
 
 `disabled` is a real theme and also the opt-out: an element themed `disabled` is never
 choreographed.
@@ -210,8 +227,11 @@ package does. Getting that one publish out cost three opaque failures:
 ## Where this is going
 
 Ported so far: the conductor, `<neodigm-toast>`, `<neodigm-marquee>`,
-`<neodigm-tulip>`. The original has roughly a dozen more — ActIcon, Juicebar,
-SodaPop, Poptart, Carousel, Enchanted CTA, Picnic, Claire, Wired4Sound.
+`<neodigm-tulip>`. Built new, with no original to port: `<neodigm-buffet>`, a
+two-level menu that takes `m5t-primary-nav`'s metadata unchanged and themes as
+one instrument (per-item `theme` accents live inside and are not swept). The
+original has roughly a dozen more — ActIcon, Juicebar, SodaPop, Poptart,
+Carousel, Enchanted CTA, Picnic, Claire, Wired4Sound.
 
 Next, and cheaper than Tulip was because `place()` already exists: **Poptart** and
 **SodaPop**, both floating surfaces.

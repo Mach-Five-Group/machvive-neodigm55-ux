@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   THEMES, THEME_NAMES, THEME_ATTR, PULSE_ATTR,
   themeCss, installTheme, resolveTheme,
+  INK_DARK, INK_LIGHT, contrast, inkFor, NEUTRALS, SCHEME_ATTR,
   robinTheme, pulseTheme, flashTitle, resetTitle,
   setMotionAllowed, motionAllowed, resetMotion
 } from '../src/conductor/index.js';
@@ -69,6 +70,107 @@ describe('the palette', () => {
     }
   });
 
+  test('emits an ink for each surface of every theme', () => {
+    const css = themeCss();
+    for (const name of THEME_NAMES) {
+      const t = THEMES[name];
+      assert.match(css, new RegExp(`--n55-${name}-ink: ${inkFor(t.color)};`), `${name} ink`);
+      assert.match(css, new RegExp(`--n55-${name}-deep-ink: ${inkFor(t.deep)};`), `${name} deep ink`);
+    }
+  });
+
+  test('contrast matches the WCAG formula at its fixed points', () => {
+    assert.equal(contrast('#000000', '#ffffff'), 21);
+    assert.equal(contrast('#fff', '#fff'), 1);
+    assert.equal(contrast('#777777', '#ffffff').toFixed(2), '4.48');
+    // Greys hide the channel weights and the linear segment at the dark end;
+    // a saturated colour and a near-black pin both.
+    assert.equal(contrast('#ff0000', '#ffffff').toFixed(2), '4.00');
+    assert.equal(contrast('#050505', '#000000').toFixed(3), '1.030');
+    assert.ok(Number.isNaN(contrast('rgb(0 0 0)', '#fff')), 'only hex is measured');
+  });
+
+  test('inkFor picks whichever neutral contrasts more', () => {
+    assert.equal(inkFor('#ffffff'), INK_DARK);
+    assert.equal(inkFor('#000000'), INK_LIGHT);
+    for (const { color, deep } of Object.values(THEMES)) {
+      for (const surface of [color, deep]) {
+        const best = Math.max(contrast(INK_DARK, surface), contrast(INK_LIGHT, surface));
+        assert.equal(contrast(inkFor(surface), surface), best, `${surface} took the weaker ink`);
+      }
+    }
+  });
+
+  test('every theme\'s text on its colour now clears 4.25:1', () => {
+    // -deep on the colour, which the components used before, measured 1.76
+    // for party and 1.81 for marcom. Not 4.5, because two themes top out just
+    // under AA with either neutral — marcom at 4.297, danger at 4.32. The fix
+    // for those is the colour, not the ink.
+    for (const [name, t] of Object.entries(THEMES)) {
+      const ratio = contrast(inkFor(t.color), t.color);
+      assert.ok(ratio >= 4.25, `${name}: ${ratio.toFixed(3)}`);
+    }
+  });
+
+  test('a custom theme gets inks computed, and an explicit ink wins', () => {
+    const css = themeCss({ mine: { color: '#101010', deep: '#f0f0f0', glyph: 'x' } });
+    assert.match(css, /--n55-mine-ink: #fff;/);
+    assert.match(css, /--n55-mine-deep-ink: #1a1a1a;/);
+    const set = themeCss({ mine: { color: '#101010', deep: '#f0f0f0', glyph: 'x', ink: '#ffcc00' } });
+    assert.match(set, /--n55-mine-ink: #ffcc00;/);
+  });
+
+  test('a non-hex colour falls back to the dark ink rather than throwing', () => {
+    assert.equal(inkFor('oklch(70% 0.1 200)'), INK_DARK);
+    assert.equal(inkFor(undefined), INK_DARK);
+  });
+
+  test('emits each neutral as a light-dark pair', () => {
+    const css = themeCss();
+    assert.match(css, /--n55-surface: light-dark\(#fff, #1a1a1a\);/);
+    assert.match(css, /--n55-surface-ink: light-dark\(#1a1a1a, #fff\);/);
+    assert.match(css, /--n55-inverse-ink: light-dark\(#fff, #1a1a1a\);/);
+    for (const key of Object.keys(NEUTRALS)) {
+      const name = key.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+      assert.match(css, new RegExp(`--n55-${name}: light-dark\\(`), `${name} missing`);
+    }
+  });
+
+  test('every neutral ink reads on its surface in both modes', () => {
+    for (const [surface, ink] of [['surface', 'surfaceInk'], ['inverse', 'inverseInk']]) {
+      for (const mode of [0, 1]) {
+        const ratio = contrast(NEUTRALS[ink][mode], NEUTRALS[surface][mode]);
+        assert.ok(ratio >= 4.5, `${ink} on ${surface}, ${mode ? 'dark' : 'light'}: ${ratio.toFixed(2)}`);
+      }
+    }
+  });
+
+  test('data-n55-scheme pins a subtree to light or dark', () => {
+    const css = themeCss();
+    assert.equal(SCHEME_ATTR, 'data-n55-scheme');
+    assert.match(css, /\[data-n55-scheme="dark"\] \{ color-scheme: dark; \}/);
+    assert.match(css, /\[data-n55-scheme="light"\] \{ color-scheme: light; \}/);
+  });
+
+  test('the palette leaves the page\'s own color-scheme alone', () => {
+    // Setting it on :root would also restyle the page's scrollbars and form
+    // controls. Only the opt-in attribute sets it.
+    const block = themeCss().split('}')[0];
+    assert.doesNotMatch(block, /color-scheme/);
+  });
+
+  test('installTheme passes custom neutrals through', () => {
+    const style = installTheme({ neutrals: { surface: ['#fafafa', '#101010'] } });
+    assert.match(style.textContent, /--n55-surface: light-dark\(#fafafa, #101010\);/);
+    installTheme();
+  });
+
+  test('custom neutrals replace the built-in pairs', () => {
+    const css = themeCss({}, ':root', { surface: ['#fafafa', '#101010'] });
+    assert.match(css, /--n55-surface: light-dark\(#fafafa, #101010\);/);
+    assert.doesNotMatch(css, /--n55-inverse:/);
+  });
+
   test('a custom selector scopes the palette, so a section can have its own', () => {
     assert.match(themeCss(THEMES, '.promo'), /^\.promo \{/);
   });
@@ -83,6 +185,11 @@ describe('the palette', () => {
     // jsdom computes custom properties as empty; the fallback is what keeps the
     // tab glyph working rather than silently flashing an empty string.
     assert.equal(resolveTheme('brand').glyph, '🟧');
+    assert.equal(resolveTheme('brand').ink, inkFor(THEMES.brand.color));
+    assert.equal(resolveTheme('brand').deepInk, inkFor(THEMES.brand.deep));
+    const headless = resolveTheme('brand', { doc: {} });
+    assert.equal(headless.ink, inkFor(THEMES.brand.color), 'and with no document at all');
+    assert.equal(headless.deepInk, inkFor(THEMES.brand.deep));
     assert.equal(resolveTheme('nonsuch'), null);
   });
 });
