@@ -6,4 +6,6 @@ export { NeodigmTulip, TULIP_DEFAULTS, readConfig, configFrom } from './src/wc/n
 export type { TulipConfig } from './src/wc/neodigm-tulip/neodigm-tulip.js';
 export { NeodigmBuffet, readItems } from './src/wc/neodigm-buffet/neodigm-buffet.js';
 export type { BuffetItem, BuffetSelection, BuffetSelectDetail } from './src/wc/neodigm-buffet/neodigm-buffet.js';
+export { NeodigmSideDish } from './src/wc/neodigm-side-dish/neodigm-side-dish.js';
+export type { SideDishCloseDetail } from './src/wc/neodigm-side-dish/neodigm-side-dish.js';
 export * from './src/conductor/index.js';

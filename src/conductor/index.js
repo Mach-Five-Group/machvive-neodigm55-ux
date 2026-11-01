@@ -9,7 +9,7 @@
  */
 export {
   THEMES, THEME_NAMES, OPT_OUT, THEME_ATTR, PULSE_ATTR,
-  INK_DARK, INK_LIGHT, contrast, inkFor, NEUTRALS, SCHEME_ATTR,
+  INK_DARK, INK_LIGHT, contrast, inkFor, WCAG_AA, legibleFor, NEUTRALS, SCHEME_ATTR,
   themeCss, installTheme, resolveTheme
 } from './theme.js';
 

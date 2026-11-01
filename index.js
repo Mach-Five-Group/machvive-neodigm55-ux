@@ -11,14 +11,16 @@ import { NeodigmToast, DEFAULT_DURATION } from './src/wc/neodigm-toast/neodigm-t
 import { NeodigmMarquee, DEFAULT_SPEED, parseRuns, plainText } from './src/wc/neodigm-marquee/neodigm-marquee.js';
 import { NeodigmTulip, TULIP_DEFAULTS, readConfig, configFrom } from './src/wc/neodigm-tulip/neodigm-tulip.js';
 import { NeodigmBuffet, readItems } from './src/wc/neodigm-buffet/neodigm-buffet.js';
+import { NeodigmSideDish } from './src/wc/neodigm-side-dish/neodigm-side-dish.js';
 
 export { NeodigmToast, DEFAULT_DURATION };
 export { NeodigmMarquee, DEFAULT_SPEED, parseRuns, plainText };
 export { NeodigmTulip, TULIP_DEFAULTS, readConfig, configFrom };
 export { NeodigmBuffet, readItems };
+export { NeodigmSideDish };
 export {
   THEMES, THEME_NAMES, OPT_OUT, THEME_ATTR, PULSE_ATTR,
-  INK_DARK, INK_LIGHT, contrast, inkFor, NEUTRALS, SCHEME_ATTR,
+  INK_DARK, INK_LIGHT, contrast, inkFor, WCAG_AA, legibleFor, NEUTRALS, SCHEME_ATTR,
   themeCss, installTheme, resolveTheme,
   motionAllowed, setMotionAllowed, pause, play, onMotionChange, resetMotion,
   robinTheme, pulseTheme, flashTitle, resetTitle

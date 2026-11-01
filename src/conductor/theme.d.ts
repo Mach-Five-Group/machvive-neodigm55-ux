@@ -20,6 +20,15 @@ export function contrast(a: string, b: string): number;
 /** INK_DARK or INK_LIGHT, whichever contrasts more with `surface`. Pure. */
 export function inkFor(surface: string): '#1a1a1a' | '#fff';
 
+/** WCAG AA for body text, 4.5. */
+export const WCAG_AA: 4.5;
+/**
+ * The shade that carries text: `'color'` if it reaches AA with its ink, else
+ * `'deep'` if that does, else the better of the two. Emitted as
+ * `--n55-<name>-legible` and `--n55-<name>-legible-ink`.
+ */
+export function legibleFor(theme: NeodigmTheme): 'color' | 'deep';
+
 /** The thirteen Neodigm 55 themes, in round-robin order. */
 export const THEMES: Readonly<Record<string, NeodigmTheme>>;
 export const THEME_NAMES: readonly string[];

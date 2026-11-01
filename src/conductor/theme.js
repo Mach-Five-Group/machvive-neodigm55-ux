@@ -17,12 +17,20 @@
  *   --n55-<name>-glyph     the emoji the tab title flashes (see flashTitle)
  *   --n55-<name>-ink       text on the colour
  *   --n55-<name>-deep-ink  text on the deep companion
+ *   --n55-<name>-legible   whichever of the two carries text at AA
+ *   --n55-<name>-legible-ink  text on that
  *
  * The inks exist because `-deep` was used as text on the colour, and measured
  * that falls below WCAG AA (4.5:1) on twelve of the thirteen themes — party
  * manages 1.76. Each ink is whichever of two neutrals contrasts more with its
  * surface, computed rather than hand-picked so a custom palette gets readable
  * text without anyone measuring it.
+ *
+ * Ink alone cannot rescue every colour: danger and marcom are mid-tones, and
+ * the better neutral on each measures 4.32 and 4.30. The rule is that every
+ * theme has one shade, light or deep, that reaches AA with its ink — danger
+ * and marcom do on their deep shade — and `-legible` names it, so a component
+ * that has to put text on a theme can rely on it without knowing which.
  */
 
 /**
@@ -89,6 +97,25 @@ export function inkFor(surface) {
   const dark = contrast(INK_DARK, surface);
   if (Number.isNaN(dark)) return INK_DARK;
   return contrast(INK_LIGHT, surface) > dark ? INK_LIGHT : INK_DARK;
+}
+
+/** WCAG AA for body text. */
+export const WCAG_AA = 4.5;
+
+/**
+ * Which shade of a theme carries text: `'color'` if it reaches WCAG_AA with its
+ * ink, else `'deep'` if that does, else whichever contrasts more. The light
+ * shade is preferred because it is the theme as people recognise it.
+ *
+ * @param {NeodigmTheme} theme
+ * @returns {'color'|'deep'}
+ */
+export function legibleFor(theme) {
+  const color = contrast(theme.color, theme.ink ?? inkFor(theme.color));
+  const deep = contrast(theme.deep, theme.deepInk ?? inkFor(theme.deep));
+  if (color >= WCAG_AA) return 'color';
+  if (deep >= WCAG_AA) return 'deep';
+  return deep > color ? 'deep' : 'color';
 }
 
 /**
@@ -160,13 +187,20 @@ export const PULSE_ATTR = 'data-n55-theme-pulse';
  * @returns {string}
  */
 export function themeCss(themes = THEMES, selector = ':root', neutrals = NEUTRALS) {
-  const lines = Object.entries(themes).flatMap(([name, t]) => [
-    `  --n55-${name}: ${t.color};`,
-    `  --n55-${name}-deep: ${t.deep};`,
-    `  --n55-${name}-glyph: "${t.glyph}";`,
-    `  --n55-${name}-ink: ${t.ink ?? inkFor(t.color)};`,
-    `  --n55-${name}-deep-ink: ${t.deepInk ?? inkFor(t.deep)};`
-  ]);
+  const lines = Object.entries(themes).flatMap(([name, t]) => {
+    // References rather than copies, so the pair stays a matched surface and
+    // ink when a page overrides one of the shades.
+    const shade = legibleFor(t) === 'deep' ? `--n55-${name}-deep` : `--n55-${name}`;
+    return [
+      `  --n55-${name}: ${t.color};`,
+      `  --n55-${name}-deep: ${t.deep};`,
+      `  --n55-${name}-glyph: "${t.glyph}";`,
+      `  --n55-${name}-ink: ${t.ink ?? inkFor(t.color)};`,
+      `  --n55-${name}-deep-ink: ${t.deepInk ?? inkFor(t.deep)};`,
+      `  --n55-${name}-legible: var(${shade});`,
+      `  --n55-${name}-legible-ink: var(${shade}-ink);`
+    ];
+  });
   const surfaces = Object.entries(neutrals).map(([key, [light, dark]]) =>
     `  --n55-${kebab(key)}: light-dark(${light}, ${dark});`);
   return `${selector} {\n${[...lines, ...surfaces].join('\n')}\n}\n` +

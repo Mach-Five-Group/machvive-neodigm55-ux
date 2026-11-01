@@ -14,6 +14,7 @@
     "snackbar",
     "navigation",
     "menu",
+    "drawer",
     "neodigm",
     "no-dependencies",
     "esm"
@@ -46,6 +47,10 @@
     "./buffet": {
       "types": "./src/wc/neodigm-buffet/neodigm-buffet.d.ts",
       "default": "./src/wc/neodigm-buffet/neodigm-buffet.js"
+    },
+    "./side-dish": {
+      "types": "./src/wc/neodigm-side-dish/neodigm-side-dish.d.ts",
+      "default": "./src/wc/neodigm-side-dish/neodigm-side-dish.js"
     },
     "./package.json": "./package.json"
   },

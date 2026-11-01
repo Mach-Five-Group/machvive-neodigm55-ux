@@ -86,6 +86,12 @@ Text on a theme colour uses `--n55-<name>-ink` (and `-deep-ink` on the deep shad
 near-black or white, whichever contrasts more, computed by `inkFor()` so a custom
 palette stays readable. `contrast()` is exported for auditing a palette in CI.
 
+Every theme has one shade, light or deep, that carries text at WCAG AA (4.5:1) with
+its ink. Danger and marcom are mid-tones that miss on the light shade with either
+neutral, and pass on the deep one. `--n55-<name>-legible` and `-legible-ink` name
+that shade, preferring the light one, so a component can rely on it without knowing
+which; `legibleFor(theme)` gives the same answer in Node.
+
 ### Light and dark
 
 Components follow the `color-scheme` they inherit, per instance, with no JavaScript.
@@ -149,6 +155,34 @@ menu.updateCount('people', 4);
 The theme on the host colours the whole menu, so a sweep moves across it as one
 instrument. An item's own `theme` is an accent that a sweep does not reach. Height
 is `--n55-buffet-height` (default `64px`). Sticky positioning is left to the page.
+
+## SideDish
+
+A scrollable panel that slides in from the right over its container — 40% of the
+width, full height — with a scrim over the rest. The scrim, Escape and the X close it.
+
+```html
+<main style="position: relative">
+  <neodigm-side-dish label="Filters" data-n55-theme="brand">
+    <h2 slot="title">Filters</h2>
+    …content; the panel scrolls…
+  </neodigm-side-dish>
+</main>
+```
+
+```js
+const dish = document.querySelector('neodigm-side-dish');
+dish.show();
+dish.addEventListener('neodigm-side-dish-close', (e) => {
+  if (hasUnsavedWork()) e.preventDefault();        // cancelable; e.detail.reason says
+});                                                // 'scrim', 'escape', 'close' or 'api'
+```
+
+The host covers its containing block, so give the container a position; style the
+host `position: fixed` to cover the viewport instead. Width is
+`--n55-side-dish-width` (default `40%`). The panel is a light/dark surface; the theme
+colours the X, on its legible shade. Escape closes only the most recently opened
+panel. Focus moves into the panel and comes back on close, but Tab is not trapped.
 
 ## What changed in the port
 

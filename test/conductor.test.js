@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   THEMES, THEME_NAMES, THEME_ATTR, PULSE_ATTR,
   themeCss, installTheme, resolveTheme,
-  INK_DARK, INK_LIGHT, contrast, inkFor, NEUTRALS, SCHEME_ATTR,
+  INK_DARK, INK_LIGHT, contrast, inkFor, WCAG_AA, legibleFor, NEUTRALS, SCHEME_ATTR,
   robinTheme, pulseTheme, flashTitle, resetTitle,
   setMotionAllowed, motionAllowed, resetMotion
 } from '../src/conductor/index.js';
@@ -110,6 +110,39 @@ describe('the palette', () => {
       const ratio = contrast(inkFor(t.color), t.color);
       assert.ok(ratio >= 4.25, `${name}: ${ratio.toFixed(3)}`);
     }
+  });
+
+  test('every theme has one shade that carries text at AA, and -legible names it', () => {
+    // The palette's rule: light or deep, one of them reaches 4.5 with its ink.
+    // Danger and marcom only manage it on the deep shade (10.86 and 7.33).
+    for (const [name, t] of Object.entries(THEMES)) {
+      const shade = legibleFor(t);
+      const surface = shade === 'deep' ? t.deep : t.color;
+      const ratio = contrast(surface, inkFor(surface));
+      assert.ok(ratio >= WCAG_AA, `${name} ${shade}: ${ratio.toFixed(2)}`);
+    }
+    assert.equal(WCAG_AA, 4.5);
+  });
+
+  test('legibleFor prefers the colour, and falls to deep only when it must', () => {
+    assert.equal(legibleFor(THEMES.brand), 'color');
+    assert.equal(legibleFor(THEMES.success), 'color', 'success passes at 4.54, by a hair');
+    assert.equal(legibleFor(THEMES.danger), 'deep');
+    assert.equal(legibleFor(THEMES.marcom), 'deep');
+    // Neither passes: the better of the two, rather than a fixed side.
+    // #777777 tops out at 4.48 and #808080 at 4.41.
+    assert.equal(legibleFor({ color: '#777777', deep: '#808080', glyph: 'x' }), 'color');
+    assert.equal(legibleFor({ color: '#808080', deep: '#777777', glyph: 'x' }), 'deep');
+    // An explicit ink is what gets measured.
+    assert.equal(legibleFor({ color: '#000000', deep: '#000000', glyph: 'x', ink: '#000000' }), 'deep');
+  });
+
+  test('emits -legible as references to the chosen shade and its ink', () => {
+    const css = themeCss();
+    assert.match(css, /--n55-brand-legible: var\(--n55-brand\);/);
+    assert.match(css, /--n55-brand-legible-ink: var\(--n55-brand-ink\);/);
+    assert.match(css, /--n55-danger-legible: var\(--n55-danger-deep\);/);
+    assert.match(css, /--n55-marcom-legible-ink: var\(--n55-marcom-deep-ink\);/);
   });
 
   test('a custom theme gets inks computed, and an explicit ink wins', () => {

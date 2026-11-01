@@ -80,6 +80,13 @@ conductor so a custom palette is readable without anyone measuring it; a theme m
 pass `ink`/`deepInk` explicitly. Toast is the deliberate exception — white on a
 colour-to-deep gradient, where no single ink suits both ends.
 
+**Every theme has one shade that reaches AA with its ink, and `-legible` names it.**
+Danger (4.32) and marcom (4.30) cannot reach 4.5 on their light shade with any
+neutral; their deep shades pass. `--n55-<name>-legible` / `-legible-ink` point at the
+light shade when it passes and the deep one otherwise, via `legibleFor()`. A test
+pins the rule for the built-in palette. New components that put text or a glyph on
+a theme surface should use `-legible`.
+
 **Light and dark are `color-scheme`, resolved per instance.** Non-theme surfaces come
 from `NEUTRALS` in the conductor, emitted as `--n55-surface: light-dark(…, …)` and
 friends. `light-dark()` resolves on the element that uses the variable, against the
@@ -229,7 +236,9 @@ package does. Getting that one publish out cost three opaque failures:
 Ported so far: the conductor, `<neodigm-toast>`, `<neodigm-marquee>`,
 `<neodigm-tulip>`. Built new, with no original to port: `<neodigm-buffet>`, a
 two-level menu that takes `m5t-primary-nav`'s metadata unchanged and themes as
-one instrument (per-item `theme` accents live inside and are not swept). The
+one instrument (per-item `theme` accents live inside and are not swept), and
+`<neodigm-side-dish>`, a panel over its container whose host theme colours only
+the X. The
 original has roughly a dozen more — ActIcon, Juicebar, SodaPop, Poptart,
 Carousel, Enchanted CTA, Picnic, Claire, Wired4Sound.
 
