@@ -127,6 +127,14 @@ Four places, and missing any one breaks either the bulk import or the cherry-pic
 2. A sibling `.d.ts`.
 3. The import/export pair in `index.js` and `index.d.ts`.
 4. A new subpath in `package.json` `exports`, **with `types` first**.
+5. A row in the README's vendoring table: the conductor modules it needs at
+   runtime and its `part` names. A test compares the row to the code. Part names
+   are public API — a consumer styles through them — so removing one is breaking.
+
+Call `paletteReaches(this)` when the component first shows something themed (on
+open, or a tick after connecting if it is always visible). It is the only signal
+a consumer gets when an `installTheme` selector misses: otherwise the component
+just renders unthemed.
 
 Generate per-theme CSS rules from `THEMES` rather than hand-writing them, so adding a
 colour to the palette cannot silently leave a component unstyled for it.

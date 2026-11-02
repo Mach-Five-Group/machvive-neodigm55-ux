@@ -41,11 +41,11 @@
  *   can pin its popup with `data-n55-scheme`, replacing `data-n55-ampm-theme`.
  * - **Sound, haptics and analytics are not wired in.** Listen for the events.
  *
- * Not ported: `setOnBeforeUserExit`, an exit-intent hook unrelated to the
- * popup. Locking page scroll was a global option; a page that wants it writes
+ * `setOnBeforeUserExit` moved to the conductor as `onExitIntent`: it is a page
+ * signal, not a popup behaviour. Locking page scroll was a global option; a page that wants it writes
  * `body:has(neodigm-sodapop[open]) { overflow: hidden }`.
  */
-import { THEMES, THEME_ATTR, OPT_OUT, SCHEME_ATTR } from '../../conductor/theme.js';
+import { THEMES, THEME_ATTR, OPT_OUT, SCHEME_ATTR, paletteReaches } from '../../conductor/theme.js';
 import { motionAllowed } from '../../conductor/motion.js';
 
 const SIZES = new Set(['xsmall', 'small', 'medium', 'large']);
@@ -291,6 +291,7 @@ export class NeodigmSodaPop extends HTMLElement {
     // A replacement keeps the focus the first popup will give back.
     if (!replacing) this.#returnFocus = doc.activeElement;
     this.setAttribute('open', '');
+    paletteReaches(this);
     this.shadowRoot.querySelector('.pop').focus({ preventScroll: true });
     if (popup.fullscreen) this.#enterFullscreen();
     this.#announce('opened', { id, popup }, false);

@@ -21,7 +21,7 @@
  * document.querySelector('neodigm-toast').show('Saved ✨', { theme: 'success' });
  * ```
  */
-import { THEMES, THEME_ATTR, OPT_OUT } from '../../conductor/theme.js';
+import { THEMES, THEME_ATTR, OPT_OUT, paletteReaches } from '../../conductor/theme.js';
 import { motionAllowed } from '../../conductor/motion.js';
 import { flashTitle } from '../../conductor/choreography.js';
 
@@ -237,6 +237,7 @@ export class NeodigmToast extends HTMLElement {
     this.#progress(entry.duration);
     if (entry.theme) this.setAttribute(THEME_ATTR, entry.theme);
     this.setAttribute('open', '');
+    paletteReaches(this);
     this.dispatchEvent(new CustomEvent('neodigm-toast-show', {
       bubbles: true, composed: true, detail: { ...entry }
     }));

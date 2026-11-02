@@ -39,7 +39,7 @@
  * lives inside the shadow root, so a sweep passes it by — deliberately, it is
  * the item's identity rather than page state.
  */
-import { THEMES, THEME_ATTR } from '../../conductor/theme.js';
+import { THEMES, THEME_ATTR, paletteReaches } from '../../conductor/theme.js';
 
 /**
  * The four colours the menu is painted from, for one theme: two surfaces and
@@ -216,6 +216,8 @@ export class NeodigmBuffet extends HTMLElement {
     if (!this.hasAttribute('role')) this.setAttribute('role', 'navigation');
     if (!this.#items.length) this.#setItems(readItems(this.#source()));
     else this.#render();
+    // A tick later, so an installTheme() right after the imports lands first.
+    setTimeout(() => { if (this.isConnected) paletteReaches(this); });
   }
 
   attributeChangedCallback(name, before, after) {

@@ -31,7 +31,7 @@
  * this is deliberately bounded by its container. Focus moves into the panel on
  * open and returns on close, but Tab is not trapped.
  */
-import { THEMES, THEME_ATTR } from '../../conductor/theme.js';
+import { THEMES, THEME_ATTR, paletteReaches } from '../../conductor/theme.js';
 import { motionAllowed } from '../../conductor/motion.js';
 
 /** Open instances, most recent last, so Escape closes only the topmost. */
@@ -174,6 +174,7 @@ export class NeodigmSideDish extends HTMLElement {
   show() {
     if (this.open || !this.#announce('open', {})) return false;
     this.open = true;
+    paletteReaches(this);
     return true;
   }
 

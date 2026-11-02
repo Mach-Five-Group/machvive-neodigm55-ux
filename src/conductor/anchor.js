@@ -15,7 +15,8 @@
 /** @typedef {{ x: number, y: number, width: number, height: number }} Rect */
 /** @typedef {'top'|'right'|'bottom'|'left'} Side */
 
-const SIDES = new Set(['top', 'right', 'bottom', 'left']);
+/** The sides a surface can take. Shared, so a validator and `place` cannot disagree. */
+export const SIDES = Object.freeze(['top', 'right', 'bottom', 'left']);
 
 /**
  * Where a floating surface sits on the declared side of its trigger: centred
@@ -31,7 +32,7 @@ const SIDES = new Set(['top', 'right', 'bottom', 'left']);
  * @returns {{ x: number, y: number, side: Side }}
  */
 export function place({ trigger, surface, position = 'top', gap = 8, offsetX = 0, offsetY = 0 }) {
-  const side = SIDES.has(position) ? position : 'top';
+  const side = SIDES.includes(position) ? position : 'top';
   const midX = trigger.x + trigger.width / 2 - surface.width / 2;
   const midY = trigger.y + trigger.height / 2 - surface.height / 2;
   const at = {

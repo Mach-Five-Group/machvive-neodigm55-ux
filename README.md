@@ -75,8 +75,16 @@ is the difference that makes a theme builder possible:
 import { installTheme, themeCss } from '@machfivetechchicago/machvive-neodigm55-ux/conductor';
 
 installTheme();                    // --n55-brand, --n55-brand-deep, --n55-brand-ink, …
+installTheme({ selector: '#app' }); // or scope it to a container, off :root
 themeCss(myPalette, '.promo');     // or emit a stylesheet for a section, or for a build
 ```
+
+**A scoping selector must match an ancestor of the themed elements**, a container
+or `:root`, never a component's tag. The palette reaches into a component's
+shadow DOM only by inheritance from outside it, so a component nested inside
+another (Tulip's marquee) is reached only through its outer host. A themed
+component that the palette doesn't reach logs one `console.warn` naming this;
+otherwise it would just look unthemed.
 
 Override `--n55-brand` on a page and every component follows, with no rebuild and no
 component aware it happened. `disabled` doubles as the opt-out: an element themed
@@ -199,9 +207,26 @@ pop.addEventListener('neodigm-sodapop-close', (e) => {
     `e.detail.reason` is `scrim`, `escape`, `close`, `api` or `replace`.
 - Template content is cloned. Scripts in it are dropped, as they never ran
   under the original's `innerHTML`.
-- `setOnBeforeUserExit` is not ported.
+- `setOnBeforeUserExit` is now `onExitIntent()` in the conductor (below).
 - To lock page scroll while a popup is open, add
   `body:has(neodigm-sodapop[open]) { overflow: hidden }` to the page.
+
+### Exit intent
+
+`setOnBeforeUserExit` belonged to the page, not the popup, so it moved to the
+conductor:
+
+```js
+import { onExitIntent } from '@machfivetechchicago/machvive-neodigm55-ux/conductor';
+
+const off = onExitIntent(() => toast.show('Thanks for visiting|Bookmark us!', { theme: 'info' }));
+```
+
+It fires when the pointer leaves through the top of the page, once per tab session
+by default (`{ once: 'page' }` for once per load). It uses the original's storage key,
+so a visitor partway through a session on a migrated site isn't asked twice. Unlike the
+original, it ignores the other three edges (a second monitor isn't leaving), and
+any number of subscribers can listen.
 
 ## SideDish
 
@@ -242,6 +267,29 @@ panel. Focus moves into the panel and comes back on close, but Tab is not trappe
 | Reduced motion | a `// TODO` above `robinTheme` | respected; the sweep is suppressed, the signal is not |
 | Sweep timing | each element held the colour for `index × 56ms`, so the first never visibly changed | constant `hold`, so the wave keeps its shape |
 | Message text | `innerHTML` | text nodes |
+
+## Using the files directly
+
+Every file is published as authored, so a page that can't load modules (a
+single-file build, or a strict security policy) can vendor them. What each
+component needs from the conductor when it runs, counting what those modules
+import in turn, and the `part` names it exposes for `::part()` styling:
+
+| Component | Conductor modules at runtime | Parts |
+| --- | --- | --- |
+| `neodigm-toast` | theme, motion, choreography | message |
+| `neodigm-marquee` | theme, motion | view |
+| `neodigm-tulip` | theme, anchor | marquee, message |
+| `neodigm-buffet` | theme | primary, secondary |
+| `neodigm-side-dish` | theme, motion | body, close, header, panel, scrim |
+| `neodigm-sodapop` | theme, motion | close, popup, scrim |
+
+Part names are public API: removing or renaming one is a breaking change. A
+test keeps this table in step with the code.
+
+Importing a module has no effect beyond defining it: a component file registers
+its tag (guarded by `customElements.get`, so loading it twice is harmless), and
+the conductor does nothing until called.
 
 ## Browser support
 

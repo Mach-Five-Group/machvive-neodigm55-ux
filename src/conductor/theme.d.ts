@@ -74,3 +74,13 @@ export function installTheme(options?: {
 
 /** Reads a theme's *resolved* values, honouring any page override. Inks always present. */
 export function resolveTheme(name: string, options?: { doc?: Document }): NeodigmTheme | null;
+
+/**
+ * Whether the palette reaches a themed element. False, with one console.warn
+ * per page, when it carries a known theme whose `--n55-<theme>` does not
+ * resolve — usually an `installTheme` selector naming a component tag rather
+ * than an ancestor.
+ */
+export function paletteReaches(el: Element): boolean;
+/** Lets the warning fire again. For tests. */
+export function resetPaletteWarning(): void;

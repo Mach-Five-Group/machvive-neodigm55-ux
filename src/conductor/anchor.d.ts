@@ -1,6 +1,9 @@
 export interface Rect { x: number; y: number; width: number; height: number }
 export type Side = 'top' | 'right' | 'bottom' | 'left';
 
+/** The sides a surface can take, shared by `place` and Tulip's config reader. */
+export const SIDES: readonly Side[];
+
 export interface Placement {
   x: number;
   y: number;

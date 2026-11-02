@@ -32,8 +32,8 @@
  * - **Keyboard and touch reach it.** The original bound mouseover/mouseout and
  *   excluded mobile outright, leaving the tip unreachable without a pointer.
  */
-import { THEMES, THEME_ATTR, OPT_OUT } from '../../conductor/theme.js';
-import { place, rectOf } from '../../conductor/anchor.js';
+import { THEMES, THEME_ATTR, OPT_OUT, paletteReaches } from '../../conductor/theme.js';
+import { place, rectOf, SIDES } from '../../conductor/anchor.js';
 
 /** Matches the original's `oCnfDef`. */
 export const TULIP_DEFAULTS = Object.freeze({
@@ -49,7 +49,6 @@ export const TULIP_DEFAULTS = Object.freeze({
 });
 
 const SIZES = new Set(['small', 'medium', 'large']);
-const SIDES = new Set(['top', 'right', 'bottom', 'left']);
 
 /**
  * Reads a trigger's configuration.
@@ -74,7 +73,7 @@ export function readConfig(raw) {
   // Unknown values fall back rather than reaching CSS as a bogus attribute.
   if (!THEMES[config.theme]) config.theme = TULIP_DEFAULTS.theme;
   if (!SIZES.has(config.size)) config.size = TULIP_DEFAULTS.size;
-  if (!SIDES.has(config.position)) config.position = TULIP_DEFAULTS.position;
+  if (!SIDES.includes(config.position)) config.position = TULIP_DEFAULTS.position;
   config.mrq = Boolean(config.mrq);
   // Numbers or numeric strings; anything else is no adjustment rather than NaN.
   for (const key of ['offsetX', 'offsetY']) {
@@ -217,6 +216,7 @@ export class NeodigmTulip extends HTMLElement {
     this.#trigger = el;
     this.#fill(config);
     this.setAttribute('open', '');
+    paletteReaches(this);
     this.#position(el, config);
     return true;
   }

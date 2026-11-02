@@ -23,7 +23,8 @@ export { NeodigmSodaPop, readPopup };
 export {
   THEMES, THEME_NAMES, OPT_OUT, THEME_ATTR, PULSE_ATTR,
   INK_DARK, INK_LIGHT, contrast, inkFor, WCAG_AA, legibleFor, NEUTRALS, SCHEME_ATTR,
-  themeCss, installTheme, resolveTheme,
+  themeCss, installTheme, resolveTheme, paletteReaches, resetPaletteWarning,
   motionAllowed, setMotionAllowed, pause, play, onMotionChange, resetMotion,
-  robinTheme, pulseTheme, flashTitle, resetTitle
+  robinTheme, pulseTheme, flashTitle, resetTitle,
+  place, rectOf, SIDES, onExitIntent, EXIT_KEY
 } from './src/conductor/index.js';

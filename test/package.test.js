@@ -83,6 +83,15 @@ describe('the manifest', () => {
     }
   });
 
+  test('index.js exports every runtime name the conductor does', async () => {
+    // index.d.ts re-exports the whole conductor, so a name index.js leaves out
+    // type-checks and then fails at runtime. place and rectOf shipped that way.
+    const conductor = await import('../src/conductor/index.js');
+    const bulk = await import('../index.js');
+    const missing = Object.keys(conductor).filter((name) => !(name in bulk));
+    assert.deepEqual(missing, [], `index.js does not export ${missing.join(', ')}`);
+  });
+
   test('publishes publicly, which a scoped package needs', () => {
     assert.equal(pkg.publishConfig?.access, 'public');
   });
@@ -167,6 +176,53 @@ describe('what ships', () => {
       const hit = text.match(INVISIBLE);
       assert.equal(hit, null,
         `${file} contains U+${hit ? hit[0].codePointAt(0).toString(16).toUpperCase().padStart(4, '0') : ''}`);
+    }
+  });
+});
+
+describe('the README\'s vendoring table', () => {
+  // Single-file consumers vendor the source and use this table to know what
+  // to carry and which ::part() names they can rely on.
+  const rows = new Map(readFileSync(new URL('README.md', root), 'utf8')
+    .split('\n')
+    .map((line) => /^\| `(neodigm-[a-z-]+)` \| ([^|]*) \| ([^|]*) \|$/.exec(line))
+    .filter(Boolean)
+    .map(([, tag, mods, parts]) => [tag, {
+      modules: mods.split(',').map((m) => m.trim()).sort(),
+      parts: parts.split(',').map((p) => p.trim()).sort()
+    }]));
+
+  /** Conductor modules a file needs, following the conductor's own imports. */
+  const conductorNeeds = (file, seen = new Set()) => {
+    const text = readFileSync(new URL(file, root), 'utf8');
+    for (const [, name] of text.matchAll(/^import [^;]*from '(?:\.\.\/\.\.\/conductor\/|\.\/)([a-z]+)\.js';/gm)) {
+      if (seen.has(name)) continue;
+      seen.add(name);
+      conductorNeeds(`src/conductor/${name}.js`, seen);
+    }
+    return [...seen].sort();
+  };
+
+  test('lists every component', () => {
+    for (const file of components) {
+      const tag = file.split('/')[2];
+      assert.ok(rows.has(tag), `${tag} has no row`);
+    }
+  });
+
+  test('names exactly the conductor modules each component needs at runtime', () => {
+    for (const file of components) {
+      const tag = file.split('/')[2];
+      assert.deepEqual(rows.get(tag)?.modules, conductorNeeds(file), tag);
+    }
+  });
+
+  test('names exactly the parts each component exposes', () => {
+    for (const file of components) {
+      const tag = file.split('/')[2];
+      const text = readFileSync(new URL(file, root), 'utf8');
+      const parts = [...new Set([...text.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]))].sort();
+      assert.deepEqual(rows.get(tag)?.parts, parts, `${tag}: a part was added or removed`);
     }
   });
 });

@@ -10,7 +10,7 @@
 export {
   THEMES, THEME_NAMES, OPT_OUT, THEME_ATTR, PULSE_ATTR,
   INK_DARK, INK_LIGHT, contrast, inkFor, WCAG_AA, legibleFor, NEUTRALS, SCHEME_ATTR,
-  themeCss, installTheme, resolveTheme
+  themeCss, installTheme, resolveTheme, paletteReaches, resetPaletteWarning
 } from './theme.js';
 
 export {
@@ -21,4 +21,6 @@ export {
   robinTheme, pulseTheme, flashTitle, resetTitle
 } from './choreography.js';
 
-export { place, rectOf } from './anchor.js';
+export { place, rectOf, SIDES } from './anchor.js';
+
+export { onExitIntent, EXIT_KEY } from './intent.js';

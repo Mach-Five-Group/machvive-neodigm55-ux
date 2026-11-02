@@ -30,7 +30,7 @@
  * <neodigm-marquee>Rich <span data-n55-theme="danger">markup</span> works too</neodigm-marquee>
  * ```
  */
-import { THEMES, THEME_ATTR } from '../../conductor/theme.js';
+import { THEMES, THEME_ATTR, paletteReaches } from '../../conductor/theme.js';
 import { motionAllowed, onMotionChange } from '../../conductor/motion.js';
 
 /** ms between steps. The original drove this from a shared metronome at ~132ms. */
@@ -124,6 +124,8 @@ export class NeodigmMarquee extends HTMLElement {
 
     this.#unwatchMotion = onMotionChange(() => this.#schedule());
     this.#schedule();
+    // A tick later, so an installTheme() right after the imports lands first.
+    setTimeout(() => { if (this.isConnected) paletteReaches(this); });
   }
 
   disconnectedCallback() {

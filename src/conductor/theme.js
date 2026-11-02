@@ -217,6 +217,15 @@ const STYLE_ID = 'n55-theme-tokens';
  * Idempotent: calling it again replaces the stylesheet rather than stacking a
  * second one, which is what lets a theme builder preview a palette live.
  *
+ * **A `selector` must match an ancestor of every themed element, in the light
+ * DOM** — a container such as `#app`, or `:root`. Not a component's tag: this
+ * is a document stylesheet and cannot reach inside a shadow root, so a
+ * component rendered inside another's (Tulip's marquee) gets the palette only
+ * by inheriting it from the outer host. Scoped to `neodigm-marquee`, the
+ * marquee inside a Tulip matches the selector in principle, is never reached
+ * in practice, and renders unthemed with no error. Components that carry a
+ * theme warn once when the palette has not arrived (see `paletteReaches`).
+ *
  * @param {{ themes?: Record<string, NeodigmTheme>, selector?: string,
  *   neutrals?: Record<string, [string, string]>, doc?: Document }} [options]
  * @returns {HTMLStyleElement|null} null where there is no document.
@@ -231,6 +240,37 @@ export function installTheme({
   if (!style.isConnected) doc.head.append(style);
   return style;
 }
+
+let warned = false;
+
+/**
+ * Whether the palette reaches a themed element: true when it carries no
+ * known theme, or its `--n55-<theme>` resolves. False otherwise, with one
+ * `console.warn` per page naming the likely cause, because the failure is
+ * otherwise silent — the component falls back to its built-in colours and
+ * looks merely unthemed.
+ *
+ * Called by components when they first show something themed; reads computed
+ * style, so it is never called at import and the conductor stays headless.
+ *
+ * @param {Element} el
+ * @returns {boolean}
+ */
+export function paletteReaches(el) {
+  const name = el?.getAttribute?.(THEME_ATTR);
+  if (!name || !THEMES[name] || typeof globalThis.getComputedStyle !== 'function') return true;
+  if (globalThis.getComputedStyle(el).getPropertyValue(`--n55-${name}`).trim()) return true;
+  if (!warned) {
+    warned = true;
+    console.warn(`Neodigm 55: <${el.localName}> has ${THEME_ATTR}="${name}", but --n55-${name} ` +
+      'does not reach it, so it renders unthemed. Call installTheme(); if you pass a selector, ' +
+      'it must match an ancestor in the light DOM (a container, or :root), not a component tag.');
+  }
+  return false;
+}
+
+/** Lets the warning fire again. For tests. */
+export function resetPaletteWarning() { warned = false; }
 
 /**
  * Reads a theme's resolved values from the document.
