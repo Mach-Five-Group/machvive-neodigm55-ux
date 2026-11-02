@@ -18,10 +18,9 @@
  * One surface, many triggers, config found by walking up from whatever was
  * hovered — all as the original. What changed:
  *
- * - **It is placed by the shared anchor**, which flips to another side when the
- *   preferred one would run off screen. The original computed a left offset and
- *   never checked, so a tip on a trigger near the right edge rendered off the
- *   viewport.
+ * - **`offsetX` and `offsetY` move it**, in pixels, from where the declared side
+ *   puts it. The position is the designer's: nothing checks the viewport or
+ *   moves the tip to another side.
  * - **`msg` is text, never markup.** The original used `innerHTML`, and a tip
  *   is routinely built from a product name or a server string.
  * - **Every `|` breaks a line**, not just the first. `String.replace` with a
@@ -44,7 +43,9 @@ export const TULIP_DEFAULTS = Object.freeze({
   theme: 'brand',
   size: 'small',
   position: 'top',
-  icon: ''
+  icon: '',
+  offsetX: 0,
+  offsetY: 0
 });
 
 const SIZES = new Set(['small', 'medium', 'large']);
@@ -75,6 +76,11 @@ export function readConfig(raw) {
   if (!SIZES.has(config.size)) config.size = TULIP_DEFAULTS.size;
   if (!SIDES.has(config.position)) config.position = TULIP_DEFAULTS.position;
   config.mrq = Boolean(config.mrq);
+  // Numbers or numeric strings; anything else is no adjustment rather than NaN.
+  for (const key of ['offsetX', 'offsetY']) {
+    const n = Number(config[key]);
+    config[key] = Number.isFinite(n) ? n : 0;
+  }
   config.msg = String(config.msg ?? '');
   return config;
 }
@@ -211,7 +217,7 @@ export class NeodigmTulip extends HTMLElement {
     this.#trigger = el;
     this.#fill(config);
     this.setAttribute('open', '');
-    this.#position(el, config.position);
+    this.#position(el, config);
     return true;
   }
 
@@ -272,19 +278,19 @@ export class NeodigmTulip extends HTMLElement {
     });
   }
 
-  #position(el, position) {
-    const view = globalThis.window;
+  #position(el, config) {
     const at = place({
       trigger: rectOf(el),
       surface: rectOf(this),
-      viewport: { width: view?.innerWidth ?? 0, height: view?.innerHeight ?? 0 },
-      position
+      position: config.position,
+      offsetX: config.offsetX,
+      offsetY: config.offsetY
     });
     this.style.transform = `translate(${Math.round(at.x)}px, ${Math.round(at.y)}px)`;
-    // Exposed so a page can style the pointer, and so a test can assert that a
-    // tip near an edge actually flipped rather than running off screen.
+    // Exposed so a page can style a pointer for the side.
     this.setAttribute('data-side', at.side);
   }
+
 }
 
 if (!customElements.get('neodigm-tulip')) {

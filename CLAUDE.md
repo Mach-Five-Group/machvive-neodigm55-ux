@@ -146,7 +146,7 @@ Do not "restore" any of these. Each was verified against
 | `.replace("|", "<br>")` | `split('|')` | A string needle replaces one occurrence, which is why Tulip was documented as supporting "up to two text lines". |
 | Tulip's `setOnBeforeOpen`, a callback registry keyed by element id | cancelable `neodigm-tulip-open` event | One callback per id, and it could only observe. Now several listeners can watch and any can veto. |
 | Tulip bound hover only, and bailed out entirely on mobile | hover, focus, Escape, `openFor()` | The tip was unreachable without a pointer. |
-| Tulip positioned by an inline left offset, unchecked | shared `place()` in the conductor | A tip near a viewport edge simply rendered where it could not be read. It now flips sides. |
+| Tulip positioned by inline offsets from a fixed constant | shared `place()` in the conductor, plus `offsetX`/`offsetY` | Same rule as the original: the declared side is final. **Never add fit detection, flipping or clamping** — whether a tip fits is the designer's call, made with the offsets. An earlier version of this port flipped sides near viewport edges and overrode declared positions. |
 | `// TODO test OS/UA motion mq` above `robinTheme` | `prefers-reduced-motion` honoured throughout | Suppressed motion still applies end state and still flashes the tab — that is information, not movement. |
 
 ## Testing

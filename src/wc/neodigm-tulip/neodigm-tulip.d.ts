@@ -12,6 +12,10 @@ export interface TulipConfig {
   position: Side;
   /** Optional glyph shown before the message. */
   icon: string;
+  /** Pixels added to the position the declared side gives. Nothing else moves the tip. */
+  offsetX: number;
+  /** Pixels added to the position the declared side gives. */
+  offsetY: number;
 }
 
 export const TULIP_DEFAULTS: Readonly<TulipConfig>;

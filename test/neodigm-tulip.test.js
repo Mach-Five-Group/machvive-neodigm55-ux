@@ -17,6 +17,7 @@ const trigger = (config, tag = 'button') => {
   document.body.append(el);
   return el;
 };
+const trigger_ = (config) => trigger(config);
 const message = (el) => el.shadowRoot.querySelector('.msg').textContent;
 
 beforeEach(() => { document.body.replaceChildren(); resetMotion(); });
@@ -231,60 +232,59 @@ describe('pointer, keyboard and dismissal', () => {
 });
 
 describe('placement', () => {
-  test('uses the preferred side when it fits', () => {
-    const at = place({
-      trigger: { x: 400, y: 300, width: 100, height: 40 },
-      surface: { x: 0, y: 0, width: 200, height: 50 },
-      viewport: { width: 1000, height: 800 },
-      position: 'top'
-    });
+  const trigger = { x: 400, y: 300, width: 100, height: 40 };
+  const surface = { x: 0, y: 0, width: 200, height: 50 };
+
+  test('puts the surface on the declared side, centred, with the gap', () => {
+    assert.deepEqual(place({ trigger, surface, position: 'top' }), { x: 350, y: 242, side: 'top' });
+    assert.deepEqual(place({ trigger, surface, position: 'bottom' }), { x: 350, y: 348, side: 'bottom' });
+    assert.deepEqual(place({ trigger, surface, position: 'left' }), { x: 192, y: 295, side: 'left' });
+    assert.deepEqual(place({ trigger, surface, position: 'right' }), { x: 508, y: 295, side: 'right' });
+    assert.equal(place({ trigger, surface, position: 'sideways' }).side, 'top');
+  });
+
+  test('adds the designer\'s offsets', () => {
+    assert.deepEqual(place({ trigger, surface, position: 'top', offsetX: 12, offsetY: -6 }),
+      { x: 362, y: 236, side: 'top' });
+  });
+
+  test('never second-guesses the declared side, even off screen', () => {
+    // Fit is the designer's call, made with the offsets. An earlier version of
+    // this port moved a tip to another side near a viewport edge.
+    const corner = { x: 0, y: 0, width: 20, height: 20 };
+    const at = place({ trigger: corner, surface, position: 'top' });
     assert.equal(at.side, 'top');
-    assert.equal(at.flipped, false);
-    assert.equal(at.y, 300 - 50 - 8, 'sits above the trigger, with the gap');
+    assert.equal(at.y, -58, 'above the trigger, off screen, as declared');
+    assert.equal(at.x, -90);
   });
 
-  test('flips to the opposite side rather than running off screen', () => {
-    // The original computed a left offset and never checked the viewport, so a
-    // tip on a trigger near an edge simply rendered where it could not be read.
-    const at = place({
-      trigger: { x: 400, y: 4, width: 100, height: 40 },
-      surface: { x: 0, y: 0, width: 200, height: 60 },
-      viewport: { width: 1000, height: 800 },
-      position: 'top'
-    });
-    assert.equal(at.side, 'bottom');
-    assert.equal(at.flipped, true);
+  test('Tulip opens on the declared side, at the top-left corner too', () => {
+    // jsdom has no layout, so every rect is zero: a trigger in the corner.
+    for (const position of ['top', 'right', 'bottom', 'left']) {
+      const el = mount();
+      el.openFor(trigger_(JSON.stringify({ msg: 'tip', position })));
+      assert.equal(el.getAttribute('data-side'), position);
+      el.close();
+    }
   });
 
-  test('tries the perpendicular sides before giving up', () => {
-    const at = place({
-      trigger: { x: 450, y: 380, width: 100, height: 40 },
-      // Tall enough that neither top nor bottom fits, short enough that a side
-      // does — if it fitted nowhere this would clamp instead, which is the next
-      // test.
-      surface: { x: 0, y: 0, width: 120, height: 400 },
-      viewport: { width: 1000, height: 700 },
-      position: 'top'
-    });
-    assert.ok(at.side === 'right' || at.side === 'left', `fell back to ${at.side}`);
-    assert.equal(at.clamped, false, 'it found a real fit, not a clamp');
+  test('Tulip applies offsetX and offsetY from the declaration', () => {
+    const el = mount();
+    el.openFor(trigger_('{"msg":"tip","position":"top","offsetX":12,"offsetY":-6}'));
+    // Zero rects: top is y = 0 - 0 - 8, then the offsets.
+    assert.equal(el.style.transform, 'translate(12px, -14px)');
+    el.close();
+    el.openFor(trigger_('{"msg":"tip","position":"top"}'));
+    assert.equal(el.style.transform, 'translate(0px, -8px)', 'no offsets, no adjustment');
   });
 
-  test('clamps on screen when nothing fits at all', () => {
-    const at = place({
-      trigger: { x: 10, y: 10, width: 20, height: 20 },
-      surface: { x: 0, y: 0, width: 900, height: 900 },
-      viewport: { width: 400, height: 400 },
-      position: 'top'
-    });
-    assert.equal(at.clamped, true);
-    assert.ok(at.x >= 0 && at.y >= 0, 'never positioned off the top-left');
-  });
-
-  test('the chosen side is exposed on the host, for styling and for tests', () => {
-    const tip = mount();
-    tip.openFor(trigger('x'));
-    assert.ok(['top', 'right', 'bottom', 'left'].includes(tip.getAttribute('data-side')));
+  test('offsets read numbers and numeric strings, and ignore anything else', () => {
+    assert.equal(readConfig('{"msg":"a","offsetX":"14","offsetY":-3}').offsetX, 14);
+    assert.equal(readConfig('{"msg":"a","offsetX":"14","offsetY":-3}').offsetY, -3);
+    assert.equal(readConfig('{"msg":"a","offsetX":"left"}').offsetX, 0);
+    assert.equal(readConfig('plain').offsetY, 0);
+    assert.equal(TULIP_DEFAULTS.offsetX, 0, 'the published defaults carry both keys');
+    assert.equal(TULIP_DEFAULTS.offsetY, 0);
   });
 });
 

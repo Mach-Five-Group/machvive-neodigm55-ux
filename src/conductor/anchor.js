@@ -4,81 +4,43 @@
  * Deliberately pure: it takes rectangles and returns coordinates, reads nothing
  * from the DOM and touches nothing. That keeps it in the headless conductor —
  * testable in Node, and shared by every floating surface rather than
- * reimplemented in each. The components do the measuring; this does the
- * deciding.
+ * reimplemented in each. The components do the measuring; this does the maths.
  *
- * The original computed `left` inline inside Tulip's `open()` from
- * `getBoundingClientRect()` and never checked whether the result fitted on
- * screen, so a tip on a trigger near the right edge rendered off the viewport.
+ * It does not decide anything. The side is declared, and whether the result
+ * fits is the designer's call, made with the offsets — so there is no viewport
+ * check, no flipping and no clamping. An earlier version of this port moved a
+ * tip to another side near a viewport edge, overriding the declared position.
  */
 
 /** @typedef {{ x: number, y: number, width: number, height: number }} Rect */
 /** @typedef {'top'|'right'|'bottom'|'left'} Side */
 
-/** The order to try when a preferred side does not fit: its opposite first. */
-const FALLBACKS = {
-  top: ['top', 'bottom', 'right', 'left'],
-  bottom: ['bottom', 'top', 'right', 'left'],
-  left: ['left', 'right', 'top', 'bottom'],
-  right: ['right', 'left', 'top', 'bottom']
-};
-
-/** Where the surface would sit on a given side, before any clamping. */
-function sideOffset(trigger, surface, side, gap) {
-  const midX = trigger.x + trigger.width / 2 - surface.width / 2;
-  const midY = trigger.y + trigger.height / 2 - surface.height / 2;
-  switch (side) {
-    case 'top':    return { x: midX, y: trigger.y - surface.height - gap };
-    case 'bottom': return { x: midX, y: trigger.y + trigger.height + gap };
-    case 'left':   return { x: trigger.x - surface.width - gap, y: midY };
-    default:       return { x: trigger.x + trigger.width + gap, y: midY };
-  }
-}
-
-const fits = (at, surface, viewport, pad) =>
-  at.x >= pad && at.y >= pad &&
-  at.x + surface.width <= viewport.width - pad &&
-  at.y + surface.height <= viewport.height - pad;
+const SIDES = new Set(['top', 'right', 'bottom', 'left']);
 
 /**
- * Chooses a side and position for a floating surface.
- *
- * Tries the preferred side, then its opposite, then the two perpendicular ones,
- * and takes the first that fits the viewport. If none fits — a surface larger
- * than the space available — it keeps the preferred side and clamps, because
- * a tip half off-screen is still readable and one placed somewhere arbitrary is
- * confusing.
+ * Where a floating surface sits on the declared side of its trigger: centred
+ * along the trigger's edge, `gap` away from it, then moved by the offsets.
  *
  * @param {object} options
  * @param {Rect} options.trigger The element being described, in viewport coordinates.
  * @param {Rect} options.surface The floating surface's own size.
- * @param {{ width: number, height: number }} options.viewport
- * @param {Side} [options.position] Preferred side.
+ * @param {Side} [options.position] The side. Anything else is `top`.
  * @param {number} [options.gap] Space between trigger and surface.
- * @param {number} [options.pad] Minimum distance from the viewport edge.
- * @returns {{ x: number, y: number, side: Side, flipped: boolean, clamped: boolean }}
+ * @param {number} [options.offsetX] Added to x, in pixels. The designer's adjustment.
+ * @param {number} [options.offsetY] Added to y, in pixels.
+ * @returns {{ x: number, y: number, side: Side }}
  */
-export function place({ trigger, surface, viewport, position = 'top', gap = 8, pad = 4 }) {
-  const order = FALLBACKS[position] ?? FALLBACKS.top;
-
-  for (const side of order) {
-    const at = sideOffset(trigger, surface, side, gap);
-    if (fits(at, surface, viewport, pad)) {
-      return { ...at, side, flipped: side !== position, clamped: false };
-    }
-  }
-
-  // Nothing fitted. Keep the author's chosen side and pull it back on screen.
-  const at = sideOffset(trigger, surface, position, gap);
-  const maxX = Math.max(pad, viewport.width - surface.width - pad);
-  const maxY = Math.max(pad, viewport.height - surface.height - pad);
-  return {
-    x: Math.min(Math.max(at.x, pad), maxX),
-    y: Math.min(Math.max(at.y, pad), maxY),
-    side: position,
-    flipped: false,
-    clamped: true
-  };
+export function place({ trigger, surface, position = 'top', gap = 8, offsetX = 0, offsetY = 0 }) {
+  const side = SIDES.has(position) ? position : 'top';
+  const midX = trigger.x + trigger.width / 2 - surface.width / 2;
+  const midY = trigger.y + trigger.height / 2 - surface.height / 2;
+  const at = {
+    top:    { x: midX, y: trigger.y - surface.height - gap },
+    bottom: { x: midX, y: trigger.y + trigger.height + gap },
+    left:   { x: trigger.x - surface.width - gap, y: midY },
+    right:  { x: trigger.x + trigger.width + gap, y: midY }
+  }[side];
+  return { x: at.x + offsetX, y: at.y + offsetY, side };
 }
 
 /**
