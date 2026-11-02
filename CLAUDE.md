@@ -234,16 +234,16 @@ package does. Getting that one publish out cost three opaque failures:
 ## Where this is going
 
 Ported so far: the conductor, `<neodigm-toast>`, `<neodigm-marquee>`,
-`<neodigm-tulip>`. Built new, with no original to port: `<neodigm-buffet>`, a
+`<neodigm-tulip>`, `<neodigm-sodapop>`. Built new, with no original to port: `<neodigm-buffet>`, a
 two-level menu that takes `m5t-primary-nav`'s metadata unchanged and themes as
 one instrument (per-item `theme` accents live inside and are not swept), and
 `<neodigm-side-dish>`, a panel over its container whose host theme colours only
 the X. The
-original has roughly a dozen more — ActIcon, Juicebar, SodaPop, Poptart,
+original has roughly a dozen more — ActIcon, Juicebar, Poptart,
 Carousel, Enchanted CTA, Picnic, Claire, Wired4Sound.
 
-Next, and cheaper than Tulip was because `place()` already exists: **Poptart** and
-**SodaPop**, both floating surfaces.
+Next, and cheaper than Tulip was because `place()` already exists: **Poptart**, a
+floating surface.
 
 Two decisions deliberately deferred:
 

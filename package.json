@@ -15,6 +15,8 @@
     "navigation",
     "menu",
     "drawer",
+    "popup",
+    "modal",
     "neodigm",
     "no-dependencies",
     "esm"
@@ -51,6 +53,10 @@
     "./side-dish": {
       "types": "./src/wc/neodigm-side-dish/neodigm-side-dish.d.ts",
       "default": "./src/wc/neodigm-side-dish/neodigm-side-dish.js"
+    },
+    "./sodapop": {
+      "types": "./src/wc/neodigm-sodapop/neodigm-sodapop.d.ts",
+      "default": "./src/wc/neodigm-sodapop/neodigm-sodapop.js"
     },
     "./package.json": "./package.json"
   },

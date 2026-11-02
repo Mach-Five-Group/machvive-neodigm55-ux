@@ -156,6 +156,53 @@ The theme on the host colours the whole menu, so a sweep moves across it as one
 instrument. An item's own `theme` is an accent that a sweep does not reach. Height
 is `--n55-buffet-height` (default `64px`). Sticky positioning is left to the page.
 
+## SodaPop
+
+Popups from templates, in the original's declarative format. One element serves
+every trigger on the page.
+
+```html
+<neodigm-sodapop></neodigm-sodapop>
+
+<button data-n55-sodapop-id="myPopup_id" aria-haspopup="dialog">Try Me</button>
+
+<template id="myPopup_id" data-n55-sodapop-modal="false"
+  data-n55-sodapop-size="small" data-n55-sodapop-fullscreen="false">
+  YOUR CONTENT HERE
+</template>
+```
+
+```js
+const pop = document.querySelector('neodigm-sodapop');
+pop.show('myPopup_id').shake();      // was neodigmSodaPop.autoOpen(id).shake()
+pop.close();                         // the only way a modal popup closes
+pop.addEventListener('neodigm-sodapop-close', (e) => {
+  if (e.detail.id === 'checkout' && hasUnsavedWork()) e.preventDefault();
+});
+```
+
+| Template attribute | Values |
+| --- | --- |
+| `data-n55-sodapop-modal` | `true`: the scrim and Escape shake it instead of closing, and there is no X |
+| `data-n55-sodapop-size` | `xsmall` \| `small` \| `medium` (default) \| `large` |
+| `data-n55-sodapop-fullscreen` | `true`: full screen while open, when opened by a user gesture |
+| `data-n55-sodapop-transition` | `slide-right`: a full-height drawer from the right |
+| `data-n55-scheme` | `light` \| `dark`: pins this popup's surface |
+
+**Migrating from the original:**
+- Replace `<neodigm-sodapop-scrim>` and `<neodigm-sodapop-scrim-close>` with one
+  `<neodigm-sodapop>`.
+- The callbacks become events, each with `e.detail.id`:
+  - `setOnBeforeOpen` becomes `neodigm-sodapop-open`, which is cancelable.
+  - `setOnAfterOpen` becomes `neodigm-sodapop-opened`.
+  - `setOnClose` becomes `neodigm-sodapop-close`, which is cancelable. Its
+    `e.detail.reason` is `scrim`, `escape`, `close`, `api` or `replace`.
+- Template content is cloned. Scripts in it are dropped, as they never ran
+  under the original's `innerHTML`.
+- `setOnBeforeUserExit` is not ported.
+- To lock page scroll while a popup is open, add
+  `body:has(neodigm-sodapop[open]) { overflow: hidden }` to the page.
+
 ## SideDish
 
 A scrollable panel that slides in from the right over its container — 40% of the

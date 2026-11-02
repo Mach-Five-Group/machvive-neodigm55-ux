@@ -8,4 +8,6 @@ export { NeodigmBuffet, readItems } from './src/wc/neodigm-buffet/neodigm-buffet
 export type { BuffetItem, BuffetSelection, BuffetSelectDetail } from './src/wc/neodigm-buffet/neodigm-buffet.js';
 export { NeodigmSideDish } from './src/wc/neodigm-side-dish/neodigm-side-dish.js';
 export type { SideDishCloseDetail } from './src/wc/neodigm-side-dish/neodigm-side-dish.js';
+export { NeodigmSodaPop, readPopup } from './src/wc/neodigm-sodapop/neodigm-sodapop.js';
+export type { SodaPopOptions, SodaPopOpenDetail, SodaPopCloseDetail } from './src/wc/neodigm-sodapop/neodigm-sodapop.js';
 export * from './src/conductor/index.js';
