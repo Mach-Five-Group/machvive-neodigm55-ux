@@ -16,6 +16,7 @@
     "menu",
     "drawer",
     "popup",
+    "popover",
     "modal",
     "neodigm",
     "no-dependencies",
@@ -57,6 +58,10 @@
     "./sodapop": {
       "types": "./src/wc/neodigm-sodapop/neodigm-sodapop.d.ts",
       "default": "./src/wc/neodigm-sodapop/neodigm-sodapop.js"
+    },
+    "./poptart": {
+      "types": "./src/wc/neodigm-poptart/neodigm-poptart.d.ts",
+      "default": "./src/wc/neodigm-poptart/neodigm-poptart.js"
     },
     "./package.json": "./package.json"
   },

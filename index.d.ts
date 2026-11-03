@@ -10,4 +10,6 @@ export { NeodigmSideDish } from './src/wc/neodigm-side-dish/neodigm-side-dish.js
 export type { SideDishCloseDetail } from './src/wc/neodigm-side-dish/neodigm-side-dish.js';
 export { NeodigmSodaPop, readPopup } from './src/wc/neodigm-sodapop/neodigm-sodapop.js';
 export type { SodaPopOptions, SodaPopOpenDetail, SodaPopCloseDetail } from './src/wc/neodigm-sodapop/neodigm-sodapop.js';
+export { NeodigmPoptart, readPoptart, triggerFor } from './src/wc/neodigm-poptart/neodigm-poptart.js';
+export type { PoptartConfig, PoptartTrigger, PoptartOpenDetail, PoptartCloseDetail } from './src/wc/neodigm-poptart/neodigm-poptart.js';
 export * from './src/conductor/index.js';

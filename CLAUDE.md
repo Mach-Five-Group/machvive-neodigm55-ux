@@ -155,6 +155,7 @@ Do not "restore" any of these. Each was verified against
 | Tulip's `setOnBeforeOpen`, a callback registry keyed by element id | cancelable `neodigm-tulip-open` event | One callback per id, and it could only observe. Now several listeners can watch and any can veto. |
 | Tulip bound hover only, and bailed out entirely on mobile | hover, focus, Escape, `openFor()` | The tip was unreachable without a pointer. |
 | Tulip positioned by inline offsets from a fixed constant | shared `place()` in the conductor, plus `offsetX`/`offsetY` | Same rule as the original: the declared side is final. **Never add fit detection, flipping or clamping** — whether a tip fits is the designer's call, made with the offsets. An earlier version of this port flipped sides near viewport edges and overrode declared positions. |
+| Poptart `top` subtracted the trigger's height twice; `left`/`right` centred, then shifted by the trigger's width | `place()` with a 10px gap above and below, flush beside | Its `top` landed a trigger-height too high, and beside the trigger it sat flush only when exactly as wide as the trigger. Offsets that pages added to compensate are now wrong, and the README says so. |
 | `// TODO test OS/UA motion mq` above `robinTheme` | `prefers-reduced-motion` honoured throughout | Suppressed motion still applies end state and still flashes the tab — that is information, not movement. |
 
 ## Testing
@@ -242,16 +243,20 @@ package does. Getting that one publish out cost three opaque failures:
 ## Where this is going
 
 Ported so far: the conductor, `<neodigm-toast>`, `<neodigm-marquee>`,
-`<neodigm-tulip>`, `<neodigm-sodapop>`. Built new, with no original to port: `<neodigm-buffet>`, a
+`<neodigm-tulip>`, `<neodigm-sodapop>`, `<neodigm-poptart>`. Built new, with no original to port: `<neodigm-buffet>`, a
 two-level menu that takes `m5t-primary-nav`'s metadata unchanged and themes as
 one instrument (per-item `theme` accents live inside and are not swept), and
 `<neodigm-side-dish>`, a panel over its container whose host theme colours only
 the X. The
-original has roughly a dozen more — ActIcon, Juicebar, Poptart,
+original has roughly a dozen more — ActIcon, Juicebar,
 Carousel, Enchanted CTA, Picnic, Claire, Wired4Sound.
 
-Next, and cheaper than Tulip was because `place()` already exists: **Poptart**, a
-floating surface.
+Poptart is the second floating surface on `place()`. It needed an `align` option
+(`start`/`center`/`end`, default `center` so Tulip is unchanged), because the
+original top-aligned its left/right flyouts. Like the side, alignment is declared,
+never computed from the viewport. Unlike Tulip and SodaPop, each Poptart is its own
+element and keeps its content in the page while closed. A form inside it keeping
+its values is the original's documented behaviour.
 
 Two decisions deliberately deferred:
 

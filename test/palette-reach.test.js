@@ -6,6 +6,7 @@ import '../src/wc/neodigm-buffet/neodigm-buffet.js';
 import '../src/wc/neodigm-toast/neodigm-toast.js';
 import '../src/wc/neodigm-side-dish/neodigm-side-dish.js';
 import '../src/wc/neodigm-sodapop/neodigm-sodapop.js';
+import '../src/wc/neodigm-poptart/neodigm-poptart.js';
 import { installTheme, paletteReaches, resetPaletteWarning, THEME_ATTR } from '../src/conductor/index.js';
 
 const settle = (ms = 5) => new Promise((r) => setTimeout(r, ms));
@@ -117,7 +118,8 @@ test('every component that opens checks when it opens', () => {
       t.id = 'p';
       document.body.append(t);
       el.show('p');
-    }
+    },
+    'neodigm-poptart': (el) => el.show(document.body)
   };
   for (const [tag, open] of Object.entries(opens)) {
     document.body.replaceChildren();

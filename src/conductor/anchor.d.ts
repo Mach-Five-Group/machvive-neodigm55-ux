@@ -4,6 +4,11 @@ export type Side = 'top' | 'right' | 'bottom' | 'left';
 /** The sides a surface can take, shared by `place` and Tulip's config reader. */
 export const SIDES: readonly Side[];
 
+export type Align = 'start' | 'center' | 'end';
+
+/** Where along the trigger's edge a surface lines up. */
+export const ALIGNS: readonly Align[];
+
 export interface Placement {
   x: number;
   y: number;
@@ -20,6 +25,8 @@ export function place(options: {
   trigger: Rect;
   surface: Rect;
   position?: Side;
+  /** Along the trigger's edge. `start` is the left edge above or below, the top edge beside. Default `center`. */
+  align?: Align;
   gap?: number;
   /** Added to x, in pixels. */
   offsetX?: number;

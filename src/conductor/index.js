@@ -21,6 +21,6 @@ export {
   robinTheme, pulseTheme, flashTitle, resetTitle
 } from './choreography.js';
 
-export { place, rectOf, SIDES } from './anchor.js';
+export { place, rectOf, SIDES, ALIGNS } from './anchor.js';
 
 export { onExitIntent, EXIT_KEY } from './intent.js';

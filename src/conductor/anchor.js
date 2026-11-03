@@ -18,28 +18,38 @@
 /** The sides a surface can take. Shared, so a validator and `place` cannot disagree. */
 export const SIDES = Object.freeze(['top', 'right', 'bottom', 'left']);
 
+/** Where along the trigger's edge a surface lines up. */
+export const ALIGNS = Object.freeze(['start', 'center', 'end']);
+
 /**
- * Where a floating surface sits on the declared side of its trigger: centred
- * along the trigger's edge, `gap` away from it, then moved by the offsets.
+ * Where a floating surface sits on the declared side of its trigger: lined up
+ * along the trigger's edge as `align` says, `gap` away from it, then moved by
+ * the offsets. `start` lines up the left edges above or below the trigger,
+ * and the top edges beside it.
  *
  * @param {object} options
  * @param {Rect} options.trigger The element being described, in viewport coordinates.
  * @param {Rect} options.surface The floating surface's own size.
  * @param {Side} [options.position] The side. Anything else is `top`.
+ * @param {'start'|'center'|'end'} [options.align] Anything else is `center`.
  * @param {number} [options.gap] Space between trigger and surface.
  * @param {number} [options.offsetX] Added to x, in pixels. The designer's adjustment.
  * @param {number} [options.offsetY] Added to y, in pixels.
  * @returns {{ x: number, y: number, side: Side }}
  */
-export function place({ trigger, surface, position = 'top', gap = 8, offsetX = 0, offsetY = 0 }) {
+export function place({
+  trigger, surface, position = 'top', align = 'center', gap = 8, offsetX = 0, offsetY = 0
+}) {
   const side = SIDES.includes(position) ? position : 'top';
-  const midX = trigger.x + trigger.width / 2 - surface.width / 2;
-  const midY = trigger.y + trigger.height / 2 - surface.height / 2;
+  // How far along the edge: 0 at the start, 1 at the end.
+  const k = ALIGNS.includes(align) ? ALIGNS.indexOf(align) / 2 : 0.5;
+  const alongX = trigger.x + (trigger.width - surface.width) * k;
+  const alongY = trigger.y + (trigger.height - surface.height) * k;
   const at = {
-    top:    { x: midX, y: trigger.y - surface.height - gap },
-    bottom: { x: midX, y: trigger.y + trigger.height + gap },
-    left:   { x: trigger.x - surface.width - gap, y: midY },
-    right:  { x: trigger.x + trigger.width + gap, y: midY }
+    top:    { x: alongX, y: trigger.y - surface.height - gap },
+    bottom: { x: alongX, y: trigger.y + trigger.height + gap },
+    left:   { x: trigger.x - surface.width - gap, y: alongY },
+    right:  { x: trigger.x + trigger.width + gap, y: alongY }
   }[side];
   return { x: at.x + offsetX, y: at.y + offsetY, side };
 }

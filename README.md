@@ -256,6 +256,62 @@ host `position: fixed` to cover the viewport instead. Width is
 colours the X, on its legible shade. Escape closes only the most recently opened
 panel. Focus moves into the panel and comes back on close, but Tab is not trapped.
 
+## Poptart
+
+A floating surface beside the element that opened it. Each Poptart holds its own
+content, which stays in the page while it is closed, so a form inside keeps what was
+typed. Triggers name it by id:
+
+```html
+<button data-n55-poptart-click="js-signin">Sign in</button>
+<a data-n55-poptart-hover="js-about" href="/about">About</a>
+<div data-n55-poptart-rightclick="js-menu">Right-click me</div>
+
+<neodigm-poptart id="js-signin"
+  data-n55-poptart='{"w": 256, "h": 284, "position": "bottom", "offset": {"x": 0, "y": 0}}'>
+  …content; it scrolls if taller than h…
+</neodigm-poptart>
+```
+
+```js
+const pop = document.getElementById('js-signin');
+pop.show(button);                  // was neodigmPopTart.autoOpen(el, conf, bound)
+pop.addEventListener('neodigm-poptart-open', (e) => {
+  if (busy) e.preventDefault();    // cancelable; also replaces pause()
+});
+```
+
+| `data-n55-poptart` key | Meaning |
+| --- | --- |
+| `position` | `top` \| `right` \| `bottom` (default) \| `left`. Binding: nothing moves it to another side |
+| `align` | `start` \| `center` \| `end` along the trigger. Default `center` above and below, `start` (top edges level) beside |
+| `w`, `h` | Size in px. Without `w` it is as wide as the trigger; without `h`, as tall as its content |
+| `offset` | `{x, y, w, h}` in px: `x` and `y` move it, `w` and `h` add to the size |
+| `x`, `y` | Pin that edge to a viewport coordinate, ignoring side and offsets |
+| `z` | z-index |
+
+It is never modal: a click outside, Escape or `close()` closes it, and its click
+trigger toggles it. Opening one Poptart closes any other. It follows its trigger when
+the page scrolls or resizes. Without a theme of its own it takes its trigger's, which
+colours the border; the surface is light/dark.
+
+**Migrating from the original:**
+- Rename `<neodigm-template id="…" data-n55-poptart='…'>` to
+  `<neodigm-poptart id="…" data-n55-poptart='…'>`. Triggers are unchanged.
+- The original read `offset.l` and `offset.t`, where a positive `t` moved it *up*.
+  Both are still read. Its `top` placement subtracted the trigger's height twice, and
+  `left`/`right` sat flush only when the Poptart was as wide as the trigger; markup
+  that compensated for either with an offset needs the offset removed.
+- `x` and `y` are now the coordinate itself; the original then moved it by the side.
+- The callbacks become events, each with `e.detail.id` and `e.detail.trigger`:
+  `setOnBeforeOpen` is `neodigm-poptart-open` (cancelable), `setOnAfterOpen` is
+  `neodigm-poptart-opened`, `setOnClose` is `neodigm-poptart-close` (cancelable,
+  with `e.detail.reason`: `outside`, `escape`, `trigger`, `api` or `replace`).
+- `pause()` and `play()` are gone: veto `neodigm-poptart-open` instead. `arrow` and
+  `dismiss` were never implemented and are still ignored.
+- Place it outside transformed or filtered containers, which would capture its fixed
+  positioning.
+
 ## What changed in the port
 
 | | Original | Here |
@@ -283,6 +339,7 @@ import in turn, and the `part` names it exposes for `::part()` styling:
 | `neodigm-buffet` | theme | primary, secondary |
 | `neodigm-side-dish` | theme, motion | body, close, header, panel, scrim |
 | `neodigm-sodapop` | theme, motion | close, popup, scrim |
+| `neodigm-poptart` | theme, anchor, motion | popup |
 
 Part names are public API: removing or renaming one is a breaking change. A
 test keeps this table in step with the code.

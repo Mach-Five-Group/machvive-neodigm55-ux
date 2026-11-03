@@ -13,6 +13,7 @@ import { NeodigmTulip, TULIP_DEFAULTS, readConfig, configFrom } from './src/wc/n
 import { NeodigmBuffet, readItems } from './src/wc/neodigm-buffet/neodigm-buffet.js';
 import { NeodigmSideDish } from './src/wc/neodigm-side-dish/neodigm-side-dish.js';
 import { NeodigmSodaPop, readPopup } from './src/wc/neodigm-sodapop/neodigm-sodapop.js';
+import { NeodigmPoptart, readPoptart, triggerFor } from './src/wc/neodigm-poptart/neodigm-poptart.js';
 
 export { NeodigmToast, DEFAULT_DURATION };
 export { NeodigmMarquee, DEFAULT_SPEED, parseRuns, plainText };
@@ -20,11 +21,12 @@ export { NeodigmTulip, TULIP_DEFAULTS, readConfig, configFrom };
 export { NeodigmBuffet, readItems };
 export { NeodigmSideDish };
 export { NeodigmSodaPop, readPopup };
+export { NeodigmPoptart, readPoptart, triggerFor };
 export {
   THEMES, THEME_NAMES, OPT_OUT, THEME_ATTR, PULSE_ATTR,
   INK_DARK, INK_LIGHT, contrast, inkFor, WCAG_AA, legibleFor, NEUTRALS, SCHEME_ATTR,
   themeCss, installTheme, resolveTheme, paletteReaches, resetPaletteWarning,
   motionAllowed, setMotionAllowed, pause, play, onMotionChange, resetMotion,
   robinTheme, pulseTheme, flashTitle, resetTitle,
-  place, rectOf, SIDES, onExitIntent, EXIT_KEY
+  place, rectOf, SIDES, ALIGNS, onExitIntent, EXIT_KEY
 } from './src/conductor/index.js';
