@@ -130,6 +130,10 @@ Four places, and missing any one breaks either the bulk import or the cherry-pic
 5. A row in the README's vendoring table: the conductor modules it needs at
    runtime and its `part` names. A test compares the row to the code. Part names
    are public API — a consumer styles through them — so removing one is breaking.
+6. A section in the Claude skill at
+   `plugins/machvive-neodigm55/skills/machvive-neodigm55/SKILL.md`, and its tag in
+   that skill's trigger description. A test fails until both are there, so this is
+   not optional — and bump the plugin and marketplace versions together.
 
 Call `paletteReaches(this)` when the component first shows something themed (on
 open, or a tick after connecting if it is always visible). It is the only signal
@@ -192,6 +196,50 @@ not just the pass count.
 - **Nothing that animates may outlive its visibility.** Closing a Tulip pauses its
   embedded marquee; a disconnected marquee refuses to schedule a timer. Both were
   found by a smoke script that stopped being able to exit.
+
+## Claude Code plugin
+
+The repo doubles as a plugin marketplace, so a consumer can install a skill that
+teaches Claude to use these components:
+
+```
+.claude-plugin/marketplace.json                       # must be at the repo root
+plugins/machvive-neodigm55/
+  .claude-plugin/plugin.json
+  skills/machvive-neodigm55/SKILL.md
+```
+
+Installed with `/plugin marketplace add Mach-Five-Group/machvive-neodigm55-ux`
+then `/plugin install machvive-neodigm55@machvive-neodigm55`.
+
+- **Claude Code does not scan `node_modules`.** Shipping the skill inside the npm
+  tarball would reach every consumer and be discovered by none; the plugin route is
+  the only one with real discovery. The `files` allowlist keeps `plugins/` and
+  `.claude-plugin/` out of the tarball, and a test asserts it.
+- **The plugin versions independently of the package.** Bump `plugin.json` and the
+  marketplace entry when the *skill's guidance* changes, not when the package ships —
+  tying them to the npm version forces a reinstall for every user on releases the
+  skill does not describe. A test asserts the two stay equal to each other.
+- **The skill drifts silently.** Nothing fails when it is stale: tests pass,
+  publishes succeed, and the only evidence is an agent confidently teaching something
+  untrue. A sibling package's skill sat four releases behind, missing a whole
+  component. Here that is mechanical instead: tests assert every component tag and
+  every published subpath appears in SKILL.md, and that the trigger description names
+  the tags. Adding a component therefore fails the suite until the skill mentions it.
+- **The description is the whole triggering mechanism.** A component absent from it
+  means the skill never loads for the person asking about that component.
+
+## Wiki
+
+`design/wiki/` is a **local mirror, not the source of truth** — the published wiki is
+edited on github.com and pulled down with `design/wiki/sync-wiki.sh`. The script
+never deletes; a page existing only locally is reported, not removed, because on the
+sibling repo that mistake cost a 170-line page. `design/` is gitignored, so none of
+it is committed or shipped.
+
+The wiki itself has no pages yet. GitHub does not create the `.wiki.git` repo until
+the first page is saved through the web UI, so `sync-wiki.sh` cannot clone until then
+— that failure is expected, not a bug.
 
 ## Publishing
 
@@ -269,5 +317,6 @@ element would hold no logic of its own: read attributes, call the engine.
 properties: a UI that writes `--n55-*` to `:root` and exports a stylesheet or token
 JSON. `themeCss(themes, selector)` exists for exactly this and is Node-importable.
 
-Still missing from the release pipeline: the Claude Code plugin/skill, the wiki, and a
-playground with a Playwright contrast audit across themes.
+Still missing from the release pipeline: a playground with a Playwright contrast
+audit across themes, and the wiki's actual content (the workflow is set up; no pages
+are written yet).

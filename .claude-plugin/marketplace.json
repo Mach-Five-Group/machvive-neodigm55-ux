@@ -1,0 +1,31 @@
+{
+  "name": "machvive-neodigm55",
+  "owner": {
+    "name": "MachFiveTech Chicago",
+    "url": "https://github.com/Mach-Five-Group"
+  },
+  "description": "Claude Code plugins for the Neodigm 55 UX components.",
+  "version": "1.0.0",
+  "metadata": {
+    "pluginRoot": "./plugins"
+  },
+  "plugins": [
+    {
+      "name": "machvive-neodigm55",
+      "displayName": "Neodigm 55 UX",
+      "source": "./plugins/machvive-neodigm55",
+      "description": "Build pages with the Neodigm 55 web components — a page choreographer that sweeps colour and attention across every themed element, plus the components it conducts.",
+      "version": "1.0.0",
+      "author": {
+        "name": "MachFiveTech Chicago",
+        "url": "https://github.com/Mach-Five-Group"
+      },
+      "homepage": "https://github.com/Mach-Five-Group/machvive-neodigm55-ux#readme",
+      "repository": "https://github.com/Mach-Five-Group/machvive-neodigm55-ux",
+      "license": "Apache-2.0",
+      "keywords": ["neodigm", "web-components", "custom-elements", "ux", "design-system"],
+      "category": "development",
+      "tags": ["web-components", "ux", "design-system"]
+    }
+  ]
+}

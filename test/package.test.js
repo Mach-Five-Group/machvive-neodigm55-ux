@@ -6,6 +6,22 @@ import { execFileSync } from 'node:child_process';
 const root = new URL('../', import.meta.url);
 const pkg = JSON.parse(readFileSync(new URL('package.json', root), 'utf8'));
 
+/**
+ * The real `npm pack` output, not the `files` allowlist — so drift surfaces
+ * here rather than after a release. Module-scoped because both the tarball
+ * tests and the plugin tests need it.
+ */
+const packed = () => {
+  const out = execFileSync('npm', ['pack', '--dry-run', '--json'], {
+    cwd: new URL('.', root), encoding: 'utf8'
+  });
+  const parsed = JSON.parse(out);
+  // npm 12 changed this from an array to an object keyed by package name.
+  // A test that assumes one shape passes locally and fails in CI.
+  const entry = Array.isArray(parsed) ? parsed[0] : Object.values(parsed)[0];
+  return entry.files.map((f) => f.path);
+};
+
 // Found on disk rather than listed by hand. A hand-kept list had already
 // fallen behind: Tulip shipped outside both guards that use this.
 const components = readdirSync(new URL('src/wc/', root))
@@ -98,19 +114,6 @@ describe('the manifest', () => {
 });
 
 describe('the published tarball', () => {
-  // Asserts the real `npm pack` output rather than the `files` allowlist, so
-  // drift surfaces here instead of after a release.
-  const packed = () => {
-    const out = execFileSync('npm', ['pack', '--dry-run', '--json'], {
-      cwd: new URL('.', root), encoding: 'utf8'
-    });
-    const parsed = JSON.parse(out);
-    // npm 12 changed this from an array to an object keyed by package name.
-    // A test that assumes one shape passes locally and fails in CI.
-    const entry = Array.isArray(parsed) ? parsed[0] : Object.values(parsed)[0];
-    return entry.files.map((f) => f.path);
-  };
-
   test('ships the entry points, declarations and licence', () => {
     const files = packed();
     for (const required of [
@@ -242,5 +245,69 @@ describe('the theme contract', () => {
       assert.deepEqual(unexpected, [],
         `${file}: hardcoded colours bypass the palette: ${unexpected.join(', ')}`);
     }
+  });
+});
+
+describe('the Claude Code plugin', () => {
+  const root2 = root;
+  const skill = readFileSync(new URL(
+    'plugins/machvive-neodigm55/skills/machvive-neodigm55/SKILL.md', root2), 'utf8');
+  const plugin = JSON.parse(readFileSync(new URL(
+    'plugins/machvive-neodigm55/.claude-plugin/plugin.json', root2), 'utf8'));
+  const market = JSON.parse(readFileSync(new URL('.claude-plugin/marketplace.json', root2), 'utf8'));
+
+  test('the skill names every component tag', () => {
+    // The skill drifts with no symptom: tests pass, publishes succeed, and the
+    // only evidence is an agent confidently teaching something untrue. A
+    // sibling package's skill sat four releases behind, missing a whole
+    // component, which is why this is mechanical rather than a convention.
+    const tags = readdirSync(new URL('src/wc/', root2), { withFileTypes: true })
+      .filter((e) => e.isDirectory())
+      .map((e) => e.name);
+    for (const tag of tags) {
+      assert.ok(skill.includes(`<${tag}>`), `SKILL.md never mentions <${tag}>`);
+    }
+  });
+
+  test('the skill names every published subpath', () => {
+    const subpaths = Object.keys(pkg.exports)
+      .filter((k) => k.startsWith('./') && k !== './package.json')
+      .map((k) => k.slice(1));
+    for (const sub of subpaths) {
+      assert.ok(skill.includes(sub), `SKILL.md never mentions the ${sub} subpath`);
+    }
+  });
+
+  test('the skill triggers on the tags it documents', () => {
+    // The description is the whole triggering mechanism; a tag absent from it
+    // means the skill never loads for the person asking about that component.
+    const description = skill.split('---')[1];
+    for (const tag of ['neodigm-toast', 'neodigm-poptart', 'neodigm-buffet']) {
+      assert.ok(description.includes(tag), `the description omits ${tag}`);
+    }
+  });
+
+  test('plugin and marketplace versions agree', () => {
+    // They version independently of the npm package but must move together,
+    // or a user installs a plugin whose manifest disagrees with the listing.
+    assert.equal(plugin.version, market.version);
+    assert.equal(plugin.version, market.plugins[0].version);
+    assert.equal(plugin.name, market.plugins[0].name);
+  });
+
+  test('the marketplace points at a plugin directory that exists', () => {
+    const source = market.plugins[0].source;
+    assert.doesNotThrow(
+      () => readFileSync(new URL(`${source}/.claude-plugin/plugin.json`, root2)),
+      `${source} has no plugin.json`);
+  });
+
+  test('the plugin does not ship in the npm tarball', () => {
+    // Claude Code does not scan node_modules, so a bundled skill would reach
+    // every consumer and be discovered by none. The plugin route is the only
+    // one with real discovery, and the files allowlist is what keeps them apart.
+    const files = packed();
+    assert.ok(!files.some((f) => f.startsWith('plugins/')), 'plugins/ must stay out of the tarball');
+    assert.ok(!files.some((f) => f.startsWith('.claude-plugin/')), 'the marketplace must stay out too');
   });
 });
