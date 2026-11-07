@@ -339,8 +339,75 @@ fallback, so a page replaces an icon or adds one with CSS:
 ```
 
 A name that is neither built in nor defined draws nothing and logs one warning.
-`iconCss()` emits the whole set as custom properties, for a page that wants the icons
-in its own CSS (`mask-image: var(--n55-icon-search)`).
+
+### Icons as pure CSS
+
+No JavaScript, no component: the set also ships as a stylesheet,
+`icons.css`, so a page can put an icon on any element it already has.
+
+```css
+/* with a bundler (Vite, webpack, Parcel, esbuild) */
+@import "@machfivetechchicago/machvive-neodigm55-ux/icons.css";
+```
+
+```html
+<!-- without one: from node_modules, or from a CDN that serves npm packages -->
+<link rel="stylesheet" href="/node_modules/@machfivetechchicago/machvive-neodigm55-ux/src/icons.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@machfivetechchicago/machvive-neodigm55-ux@0.1.9/src/icons.css">
+```
+
+It defines one custom property per icon on `:root`, `--n55-icon-<name>`, holding the
+icon as a data-URI SVG. There are three ways to use it.
+
+**As a mask, which takes the element's text colour.** This is the usual way: one
+icon, any colour, light or dark, themed or not.
+
+```css
+.search-field::before {
+  content: "";
+  display: inline-block;
+  inline-size: 20px;
+  block-size: 20px;
+  background-color: currentColor;          /* the icon's colour */
+  -webkit-mask: var(--n55-icon-search) center / contain no-repeat;
+  mask: var(--n55-icon-search) center / contain no-repeat;
+}
+.danger-zone .icon { color: var(--n55-danger); }   /* recolour by setting color */
+```
+
+**As a background image, exactly as drawn.** The icons are black, with no colour of
+their own, so this suits a light surface where black is what you want.
+
+```css
+.empty-state {
+  background: var(--n55-icon-folder-open) no-repeat center / 64px;
+}
+```
+
+**With the classes it provides**, when you would rather not write CSS:
+
+```html
+<span class="n55-icon n55-icon-search"></span>
+<button><span class="n55-icon n55-icon-send" style="--n55-icon-size: 18px"></span> Send</button>
+```
+
+`.n55-icon` does the drawing and needs one `.n55-icon-<name>` beside it; on its own it
+draws nothing. It is `--n55-icon-size` square (default `24px`) and takes `currentColor`.
+These are decorative: give the button or link around them its accessible name.
+
+To replace an icon, or add one, define the property after the stylesheet loads:
+
+```css
+:root { --n55-icon-rocket: url("data:image/svg+xml,…"); }
+```
+
+```html
+<span class="n55-icon" style="--n55-glyph: var(--n55-icon-rocket)"></span>
+```
+
+`<neodigm-icon>` reads the same properties, so an override reaches both. It does not
+need the stylesheet: without it, the component falls back to its built-in shapes.
+`iconCss()` in the conductor emits a set of your own in the same form, for a build step.
 
 | ActIcon attribute | Values |
 | --- | --- |

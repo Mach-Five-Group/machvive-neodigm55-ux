@@ -1,8 +1,8 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { readIcons, writeIcons, difference } from '../scripts/sync-icons.mjs';
-import { ICONS } from '../src/conductor/icons.js';
+import { readIcons, writeIcons, stylesheet, difference } from '../scripts/sync-icons.mjs';
+import { ICONS, ICON_NAMES } from '../src/conductor/icons.js';
 
 const target = readFileSync(new URL('../src/conductor/icons.js', import.meta.url), 'utf8');
 const svg = (d) => `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='${d}'/%3E%3C/svg%3E")`;
@@ -50,6 +50,42 @@ describe('sync-icons', () => {
   test('the shipped set round-trips unchanged', () => {
     const decls = Object.entries(ICONS).map(([n, u]) => `  --mcs-icon-${n}: ${u};`);
     assert.equal(writeIcons(target, readIcons(source(decls))), target);
+  });
+
+  test('refuses an icon whose property is already a setting', () => {
+    assert.throws(() => readIcons(source([`  --mcs-icon-size: ${svg('1')};`])), /--n55-icon-size/);
+  });
+
+  test('the shipped icons.css is exactly the shipped set, as pure CSS', () => {
+    // Two files from one list: if they disagree, a page using the stylesheet
+    // and a page using <neodigm-icon> draw different icons.
+    const shipped = readFileSync(new URL('../src/icons.css', import.meta.url), 'utf8');
+    assert.equal(shipped, stylesheet(Object.entries(ICONS)));
+  });
+
+  test('icons.css parses: one property per icon on :root, one class per icon', () => {
+    const style = document.createElement('style');
+    style.textContent = readFileSync(new URL('../src/icons.css', import.meta.url), 'utf8');
+    document.head.append(style);
+    try {
+      const rules = [...style.sheet.cssRules];
+      assert.equal(rules.length, 2 + ICON_NAMES.length);
+      const root = rules.find((r) => r.selectorText === ':root');
+      for (const name of ICON_NAMES) {
+        // jsdom re-serialises url() in its own escaped form; the exact text is
+        // pinned by the test above, so here it only has to have parsed.
+        assert.match(root.style.getPropertyValue(`--n55-icon-${name}`), /^\s*url\(.*data:image\/svg\+xml/, name);
+        const cls = rules.find((r) => r.selectorText === `.n55-icon-${name}`);
+        assert.equal(cls.style.getPropertyValue('--n55-glyph').trim(), `var(--n55-icon-${name})`, name);
+      }
+      const base = rules.find((r) => r.selectorText === '.n55-icon');
+      assert.equal(base.style.getPropertyValue('background-color'), 'currentcolor');
+    } finally { style.remove(); }
+  });
+
+  test('a stylesheet draws a blank, never a filled square, without a name class', () => {
+    assert.match(stylesheet([['a', svg('1')]]),
+      /mask: var\(--n55-glyph, linear-gradient\(transparent, transparent\)\) center \/ contain no-repeat;/);
   });
 
   test('reports what was added and removed', () => {

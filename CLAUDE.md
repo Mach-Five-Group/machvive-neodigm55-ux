@@ -108,7 +108,8 @@ npm run test:watch
 node --test --import ./test/setup.js test/conductor.test.js            # one file
 node --test --import ./test/setup.js "test/*.test.js" --test-name-pattern "robinTheme"
 
-npm run sync-icons       # copy the icon set from ../machvive-chat-syncopation-ai
+npm run sync-icons       # copy the icon set from ../machvive-chat-syncopation-ai,
+                         # writing src/conductor/icons.js and src/icons.css
 npm run sync-icons -- --check   # exit 1 if src/conductor/icons.js is behind it
 ```
 

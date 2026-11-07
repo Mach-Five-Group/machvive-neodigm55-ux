@@ -57,7 +57,7 @@ import { robinTheme, installTheme } from '@machfivetechchicago/machvive-neodigm5
 ```
 
 Subpaths: `/conductor`, `/toast`, `/marquee`, `/tulip`, `/buffet`, `/side-dish`,
-`/sodapop`, `/poptart`, `/icon`, `/acticon`.
+`/sodapop`, `/poptart`, `/icon`, `/acticon`, and the stylesheet `/icons.css`.
 
 Importing a component registers its tag. There is nothing to call.
 
@@ -217,6 +217,24 @@ ActIcon is the original's round icon button: `data-n55-size` `pico`…`xlarge`
 a real button: focusable, Enter/Space click, named by `label` or else its icon.
 Migrating: drop the Material Symbols font — `<neodigm-icon>dark_mode</neodigm-icon>`
 still works, the text being read as the name.
+
+**Pure CSS, no component** — prefer this when the user wants an icon on an element
+they already have. `icons.css` (subpath `/icons.css`, file `src/icons.css`) defines
+`--n55-icon-<name>` on `:root`:
+
+```css
+@import "@machfivetechchicago/machvive-neodigm55-ux/icons.css";
+.btn::before {                       /* recolourable: mask over currentColor */
+  content: ""; display: inline-block; inline-size: 20px; block-size: 20px;
+  background-color: currentColor;
+  -webkit-mask: var(--n55-icon-search) center / contain no-repeat;
+  mask: var(--n55-icon-search) center / contain no-repeat;
+}
+.empty { background: var(--n55-icon-folder-open) no-repeat center / 64px; }  /* always black */
+```
+Or classes: `<span class="n55-icon n55-icon-search"></span>` (`.n55-icon` alone draws
+nothing; size with `--n55-icon-size`). Use the mask, not `background-image`, whenever
+the icon must be coloured: the SVGs are black with no fill of their own.
 
 ## Choreography
 

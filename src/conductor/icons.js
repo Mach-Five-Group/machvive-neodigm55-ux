@@ -80,9 +80,9 @@ export function iconName(raw) {
 }
 
 /**
- * The set as a stylesheet of custom properties, for a page that wants the
- * icons in its own CSS (`mask-image: var(--n55-icon-search)`).
- * `<neodigm-icon>` does not need it: it carries the built-in set itself.
+ * A set as a stylesheet of custom properties, for a build step that emits
+ * icons of its own. The built-in set already ships this way, with classes, as
+ * `icons.css`. `<neodigm-icon>` needs neither: it carries the built-in set.
  *
  * @param {Record<string, string>} [icons]
  * @param {string} [selector]

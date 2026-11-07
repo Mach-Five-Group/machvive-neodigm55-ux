@@ -73,6 +73,7 @@
       "types": "./src/wc/neodigm-acticon/neodigm-acticon.d.ts",
       "default": "./src/wc/neodigm-acticon/neodigm-acticon.js"
     },
+    "./icons.css": "./src/icons.css",
     "./package.json": "./package.json"
   },
   "sideEffects": true,

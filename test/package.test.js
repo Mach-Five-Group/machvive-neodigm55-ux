@@ -172,7 +172,7 @@ describe('what ships', () => {
     // paste them.
     const INVISIBLE = new RegExp(
       '[\\u200B-\\u200F\\u2028\\u2029\\u202A-\\u202E\\u2060-\\u2064\\u206A-\\u206F\\uFEFF]');
-    const sources = ['index.js', ...conductor, ...components];
+    const sources = ['index.js', ...conductor, ...components, 'src/icons.css'];
     assert.ok(components.length >= 4, `found only ${components.join(', ')}`);
     for (const file of sources) {
       const text = readFileSync(new URL(file, root), 'utf8');
