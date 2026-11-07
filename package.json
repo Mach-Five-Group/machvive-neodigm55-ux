@@ -17,6 +17,8 @@
     "drawer",
     "popup",
     "popover",
+    "icons",
+    "icon-button",
     "modal",
     "neodigm",
     "no-dependencies",
@@ -62,6 +64,14 @@
     "./poptart": {
       "types": "./src/wc/neodigm-poptart/neodigm-poptart.d.ts",
       "default": "./src/wc/neodigm-poptart/neodigm-poptart.js"
+    },
+    "./icon": {
+      "types": "./src/wc/neodigm-icon/neodigm-icon.d.ts",
+      "default": "./src/wc/neodigm-icon/neodigm-icon.js"
+    },
+    "./acticon": {
+      "types": "./src/wc/neodigm-acticon/neodigm-acticon.d.ts",
+      "default": "./src/wc/neodigm-acticon/neodigm-acticon.js"
     },
     "./package.json": "./package.json"
   },

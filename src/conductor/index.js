@@ -24,3 +24,5 @@ export {
 export { place, rectOf, SIDES, ALIGNS } from './anchor.js';
 
 export { onExitIntent, EXIT_KEY } from './intent.js';
+
+export { ICONS, ICON_NAMES, iconName, iconCss } from './icons.js';

@@ -220,6 +220,20 @@ describe('the README\'s vendoring table', () => {
     }
   });
 
+  test('a component that renders another lists that one\'s modules too', () => {
+    // A vendored ActIcon draws through <neodigm-icon>, so it needs the icon
+    // module even if it stopped importing it directly.
+    for (const file of components) {
+      const tag = file.split('/')[2];
+      const text = readFileSync(new URL(file, root), 'utf8');
+      for (const [, inner] of text.matchAll(/^import '\.\.\/(neodigm-[a-z-]+)\/\1\.js';/gm)) {
+        for (const mod of rows.get(inner)?.modules ?? []) {
+          assert.ok(rows.get(tag)?.modules.includes(mod), `${tag} renders ${inner}, which needs ${mod}`);
+        }
+      }
+    }
+  });
+
   test('names exactly the parts each component exposes', () => {
     for (const file of components) {
       const tag = file.split('/')[2];

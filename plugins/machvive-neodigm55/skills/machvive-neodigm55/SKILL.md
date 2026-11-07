@@ -1,6 +1,6 @@
 ---
 name: machvive-neodigm55
-description: Build pages with the Neodigm 55 UX web components (@machfivetechchicago/machvive-neodigm55-ux) — a page-level choreographer that sweeps colour across every themed element, plus toast, marquee, tooltip, menu, popup, panel and popover components. Use this whenever the user mentions Neodigm, neodigm55, machvive UX, robinTheme, data-n55-theme, or any of the tags neodigm-toast, neodigm-marquee, neodigm-tulip, neodigm-buffet, neodigm-sodapop, neodigm-side-dish or neodigm-poptart — even when they don't name the package. Also use when someone is porting the original Neodigm 55 IIFE library to web components, asking how to theme a page so attention moves across it, building a theme builder on CSS custom properties, or debugging why a component renders unthemed or why a colour sweep misses something.
+description: Build pages with the Neodigm 55 UX web components (@machfivetechchicago/machvive-neodigm55-ux) — a page-level choreographer that sweeps colour across every themed element, plus toast, marquee, tooltip, menu, popup, panel, popover, icon and icon-button components. Use this whenever the user mentions Neodigm, neodigm55, machvive UX, robinTheme, data-n55-theme, or any of the tags neodigm-toast, neodigm-marquee, neodigm-tulip, neodigm-buffet, neodigm-sodapop, neodigm-side-dish, neodigm-poptart, neodigm-icon or neodigm-acticon — even when they don't name the package. Also use when someone is porting the original Neodigm 55 IIFE library to web components, asking how to theme a page so attention moves across it, building a theme builder on CSS custom properties, or debugging why a component renders unthemed or why a colour sweep misses something.
 ---
 
 # Neodigm 55 UX components
@@ -57,7 +57,7 @@ import { robinTheme, installTheme } from '@machfivetechchicago/machvive-neodigm5
 ```
 
 Subpaths: `/conductor`, `/toast`, `/marquee`, `/tulip`, `/buffet`, `/side-dish`,
-`/sodapop`, `/poptart`.
+`/sodapop`, `/poptart`, `/icon`, `/acticon`.
 
 Importing a component registers its tag. There is nothing to call.
 
@@ -197,6 +197,26 @@ Triggers: `data-n55-poptart-click`, `-hover`, `-rightclick`. Config keys:
 page while closed, so a form keeps what was typed. Never modal. Opening one closes
 any other. Place it **outside transformed or filtered containers**, which capture
 fixed positioning.
+
+### `<neodigm-icon>` and `<neodigm-acticon>` — icons without a font
+
+```html
+<neodigm-icon name="search"></neodigm-icon>
+<neodigm-acticon data-n55-theme="brand" data-n55-size="small" icon="settings"
+  label="Settings" data-n55-poptart-click="js-settings"></neodigm-acticon>
+```
+41 built-in Material Symbols (`ICON_NAMES` in the conductor), each a CSS mask over
+`currentColor`. The set is `--n55-icon-<name>` custom properties with the built-in
+shape as fallback, so **add or replace an icon with CSS**, never by editing the
+package: `:root { --n55-icon-rocket: url("data:image/svg+xml,…") }`. An unknown name
+draws nothing and warns once. `<neodigm-icon>` is decorative unless given `label`;
+size is `--n55-icon-size`.
+
+ActIcon is the original's round icon button: `data-n55-size` `pico`…`xlarge`
+(default `xsmall`), any theme (`ghost` is an outline, `disabled` is unfocusable), and
+a real button: focusable, Enter/Space click, named by `label` or else its icon.
+Migrating: drop the Material Symbols font — `<neodigm-icon>dark_mode</neodigm-icon>`
+still works, the text being read as the name.
 
 ## Choreography
 

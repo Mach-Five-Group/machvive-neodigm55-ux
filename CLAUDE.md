@@ -291,12 +291,13 @@ package does. Getting that one publish out cost three opaque failures:
 ## Where this is going
 
 Ported so far: the conductor, `<neodigm-toast>`, `<neodigm-marquee>`,
-`<neodigm-tulip>`, `<neodigm-sodapop>`, `<neodigm-poptart>`. Built new, with no original to port: `<neodigm-buffet>`, a
+`<neodigm-tulip>`, `<neodigm-sodapop>`, `<neodigm-poptart>`, `<neodigm-acticon>`
+(with `<neodigm-icon>`, which replaces the Material Symbols font). Built new, with no original to port: `<neodigm-buffet>`, a
 two-level menu that takes `m5t-primary-nav`'s metadata unchanged and themes as
 one instrument (per-item `theme` accents live inside and are not swept), and
 `<neodigm-side-dish>`, a panel over its container whose host theme colours only
 the X. The
-original has roughly a dozen more — ActIcon, Juicebar,
+original has roughly a dozen more — Juicebar,
 Carousel, Enchanted CTA, Picnic, Claire, Wired4Sound.
 
 Poptart is the second floating surface on `place()`. It needed an `align` option

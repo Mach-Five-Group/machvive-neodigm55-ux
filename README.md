@@ -312,6 +312,54 @@ colours the border; the surface is light/dark.
 - Place it outside transformed or filtered containers, which would capture its fixed
   positioning.
 
+## Icons and ActIcon
+
+`<neodigm-icon>` draws an icon from CSS, with no icon font. `<neodigm-acticon>` is the
+original's round, themed icon button around one.
+
+```html
+<neodigm-icon name="search"></neodigm-icon>
+<neodigm-icon name="send" label="Send"></neodigm-icon>        <!-- an image, not decoration -->
+
+<neodigm-acticon data-n55-theme="brand" data-n55-size="small" icon="settings"
+  label="Settings" data-n55-poptart-click="js-settings"></neodigm-acticon>
+```
+
+The 41 built-in icons are Google's Material Symbols (Outlined, Apache-2.0), the same
+set as `machvive-chat-syncopation`. `ICON_NAMES` in the conductor lists them. Each is
+a mask over `currentColor`, so it takes the colour of whatever it sits in, and a
+`<neodigm-icon>` with a `data-n55-theme` of its own takes that theme's colour. Size is
+`--n55-icon-size` (default `24px`).
+
+The set is `--n55-icon-<name>` custom properties, and the built-in shape is only the
+fallback, so a page replaces an icon or adds one with CSS:
+
+```css
+:root { --n55-icon-rocket: url("data:image/svg+xml,…"); }
+```
+
+A name that is neither built in nor defined draws nothing and logs one warning.
+`iconCss()` emits the whole set as custom properties, for a page that wants the icons
+in its own CSS (`mask-image: var(--n55-icon-search)`).
+
+| ActIcon attribute | Values |
+| --- | --- |
+| `data-n55-size` | `pico` 14px \| `micro` 18 \| `milli`, `xsmall` (default) 24 \| `small` 29 \| `medium` 35 \| `large` 42 \| `xlarge` 50 |
+| `data-n55-theme` | any theme. `ghost` is an outline; `disabled` is greyed, unfocusable and `aria-disabled` |
+| `icon` | the icon's name, instead of a `<neodigm-icon>` child |
+| `label` | its accessible name. Without one, the icon's name is used (`chevron right`) |
+
+It is a button: focusable, and Enter or Space clicks it, so the Tulip, Poptart and
+Toast triggers on it work from the keyboard. The glyph is the theme's ink, which
+clears WCAG's 3:1 for graphics on every theme.
+
+**Migrating from the original:**
+- Drop the Material Symbols font. `<neodigm-icon class="material-symbols-outlined">dark_mode</neodigm-icon>`
+  still works: the text inside is read as the name, in either spelling.
+- The set has 41 icons, not the font's thousands. Define `--n55-icon-<name>` for any
+  other; the warning names the missing one.
+- `data-n55-ampm-theme` is replaced by `color-scheme`, as everywhere in this package.
+
 ## What changed in the port
 
 | | Original | Here |
@@ -340,6 +388,10 @@ import in turn, and the `part` names it exposes for `::part()` styling:
 | `neodigm-side-dish` | theme, motion | body, close, header, panel, scrim |
 | `neodigm-sodapop` | theme, motion | close, popup, scrim |
 | `neodigm-poptart` | theme, anchor, motion | popup |
+| `neodigm-icon` | theme, icons | glyph |
+| `neodigm-acticon` | theme, icons | icon |
+
+ActIcon renders `<neodigm-icon>`, so vendoring it means vendoring that file too.
 
 Part names are public API: removing or renaming one is a breaking change. A
 test keeps this table in step with the code.

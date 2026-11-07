@@ -12,4 +12,7 @@ export { NeodigmSodaPop, readPopup } from './src/wc/neodigm-sodapop/neodigm-soda
 export type { SodaPopOptions, SodaPopOpenDetail, SodaPopCloseDetail } from './src/wc/neodigm-sodapop/neodigm-sodapop.js';
 export { NeodigmPoptart, readPoptart, triggerFor } from './src/wc/neodigm-poptart/neodigm-poptart.js';
 export type { PoptartConfig, PoptartTrigger, PoptartOpenDetail, PoptartCloseDetail } from './src/wc/neodigm-poptart/neodigm-poptart.js';
+export { NeodigmIcon, resetIconWarning } from './src/wc/neodigm-icon/neodigm-icon.js';
+export { NeodigmActIcon, ACTICON_SIZES } from './src/wc/neodigm-acticon/neodigm-acticon.js';
+export type { ActIconSize } from './src/wc/neodigm-acticon/neodigm-acticon.js';
 export * from './src/conductor/index.js';
