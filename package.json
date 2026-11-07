@@ -84,7 +84,8 @@
   "scripts": {
     "test": "node --test --import ./test/setup.js \"test/*.test.js\"",
     "test:watch": "node --test --watch --import ./test/setup.js \"test/*.test.js\"",
-    "prepublishOnly": "npm test"
+    "prepublishOnly": "npm test",
+    "sync-icons": "node scripts/sync-icons.mjs"
   },
   "repository": {
     "type": "git",

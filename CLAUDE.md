@@ -107,6 +107,9 @@ npm run test:watch
 
 node --test --import ./test/setup.js test/conductor.test.js            # one file
 node --test --import ./test/setup.js "test/*.test.js" --test-name-pattern "robinTheme"
+
+npm run sync-icons       # copy the icon set from ../machvive-chat-syncopation-ai
+npm run sync-icons -- --check   # exit 1 if src/conductor/icons.js is behind it
 ```
 
 `--import ./test/setup.js` is required, not optional: component modules self-register

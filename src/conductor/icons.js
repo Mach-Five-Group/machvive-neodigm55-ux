@@ -2,8 +2,9 @@
  * The icon set: shapes as CSS, no font.
  *
  * Google's Material Symbols (Outlined, 24dp, weight 400, unfilled), Apache-2.0,
- * as data-URI images. Taken unchanged from machvive-chat-syncopation's generated
- * `icons.js`, so the two packages draw the same icons.
+ * as data-URI images. Copied unchanged from machvive-chat-syncopation's generated
+ * `icons.js`, so the two packages draw the same icons. Add icons there, then run
+ * `npm run sync-icons` here; do not edit the ICONS block by hand.
  *
  * Each icon is only a shape. A component masks it over `currentColor`, so one
  * definition takes any colour, theme or scheme. Like the palette, the set is
