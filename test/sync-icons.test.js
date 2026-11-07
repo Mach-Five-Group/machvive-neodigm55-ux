@@ -1,7 +1,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { readIcons, writeIcons, stylesheet, difference } from '../scripts/sync-icons.mjs';
+import { readIcons, writeIcons, stylesheet, difference, main } from '../scripts/sync-icons.mjs';
 import { ICONS, ICON_NAMES } from '../src/conductor/icons.js';
 
 const target = readFileSync(new URL('../src/conductor/icons.js', import.meta.url), 'utf8');
@@ -86,6 +86,23 @@ describe('sync-icons', () => {
   test('a stylesheet draws a blank, never a filled square, without a name class', () => {
     assert.match(stylesheet([['a', svg('1')]]),
       /mask: var\(--n55-glyph, linear-gradient\(transparent, transparent\)\) center \/ contain no-repeat;/);
+  });
+
+  test('--if-present skips a missing source, so a release from another checkout is not blocked', () => {
+    const log = console.log;
+    const said = [];
+    console.log = (m) => said.push(String(m));
+    try {
+      assert.equal(main(['--check', '--if-present', '/nowhere/icons.js']), 0);
+      assert.match(said.join('\n'), /no source at \/nowhere\/icons\.js, so not checked/);
+    } finally { console.log = log; }
+    // Without the flag a missing source is an error, not a pass.
+    assert.throws(() => main(['--check', '/nowhere/icons.js']), /ENOENT/);
+  });
+
+  test('npm version checks the icons first', () => {
+    const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+    assert.equal(pkg.scripts.preversion, 'npm run sync-icons -- --check --if-present');
   });
 
   test('reports what was added and removed', () => {

@@ -5,7 +5,7 @@
     "url": "https://github.com/Mach-Five-Group"
   },
   "description": "Claude Code plugins for the Neodigm 55 UX components.",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "metadata": {
     "pluginRoot": "./plugins"
   },
@@ -15,7 +15,7 @@
       "displayName": "Neodigm 55 UX",
       "source": "./plugins/machvive-neodigm55",
       "description": "Build pages with the Neodigm 55 web components — a page choreographer that sweeps colour and attention across every themed element, plus the components it conducts.",
-      "version": "1.2.0",
+      "version": "1.3.0",
       "author": {
         "name": "MachFiveTech Chicago",
         "url": "https://github.com/Mach-Five-Group"

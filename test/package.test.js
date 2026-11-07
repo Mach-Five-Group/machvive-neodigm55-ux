@@ -301,6 +301,17 @@ describe('the Claude Code plugin', () => {
     }
   });
 
+  test('the skill lists exactly the icons that exist', async () => {
+    // Without the list Claude invents plausible names (home, menu,
+    // chevron-right) that draw nothing. A sync that adds icons fails here until
+    // the skill names them.
+    const { ICON_NAMES } = await import('../src/conductor/icons.js');
+    const block = skill.slice(skill.indexOf('**Only these names exist**'), skill.indexOf('Underscores work too'));
+    const notIcons = ['home', 'menu', 'chevron-right', 'person'];
+    const listed = [...block.matchAll(/`([a-z0-9-]+)`/g)].map(([, n]) => n).filter((n) => !notIcons.includes(n));
+    assert.deepEqual(listed, [...ICON_NAMES]);
+  });
+
   test('plugin and marketplace versions agree', () => {
     // They version independently of the npm package but must move together,
     // or a user installs a plugin whose manifest disagrees with the listing.

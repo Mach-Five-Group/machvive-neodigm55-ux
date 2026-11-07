@@ -86,7 +86,8 @@
     "test": "node --test --import ./test/setup.js \"test/*.test.js\"",
     "test:watch": "node --test --watch --import ./test/setup.js \"test/*.test.js\"",
     "prepublishOnly": "npm test",
-    "sync-icons": "node scripts/sync-icons.mjs"
+    "sync-icons": "node scripts/sync-icons.mjs",
+    "preversion": "npm run sync-icons -- --check --if-present"
   },
   "repository": {
     "type": "git",

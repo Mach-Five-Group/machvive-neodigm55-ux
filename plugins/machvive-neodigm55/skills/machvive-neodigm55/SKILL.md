@@ -1,6 +1,6 @@
 ---
 name: machvive-neodigm55
-description: Build pages with the Neodigm 55 UX web components (@machfivetechchicago/machvive-neodigm55-ux) — a page-level choreographer that sweeps colour across every themed element, plus toast, marquee, tooltip, menu, popup, panel, popover, icon and icon-button components. Use this whenever the user mentions Neodigm, neodigm55, machvive UX, robinTheme, data-n55-theme, or any of the tags neodigm-toast, neodigm-marquee, neodigm-tulip, neodigm-buffet, neodigm-sodapop, neodigm-side-dish, neodigm-poptart, neodigm-icon or neodigm-acticon — even when they don't name the package. Also use when someone is porting the original Neodigm 55 IIFE library to web components, asking how to theme a page so attention moves across it, building a theme builder on CSS custom properties, or debugging why a component renders unthemed or why a colour sweep misses something.
+description: Build pages with the Neodigm 55 UX web components (@machfivetechchicago/machvive-neodigm55-ux) — a page-level choreographer that sweeps colour across every themed element, plus toast, marquee, tooltip, menu, popup, panel, popover, icon and icon-button components. Use this whenever the user mentions Neodigm, neodigm55, machvive UX, robinTheme, data-n55-theme, or any of the tags neodigm-toast, neodigm-marquee, neodigm-tulip, neodigm-buffet, neodigm-sodapop, neodigm-side-dish, neodigm-poptart, neodigm-icon or neodigm-acticon, or wants an icon from icons.css or --n55-icon-* — even when they don't name the package. Also use when someone is porting the original Neodigm 55 IIFE library to web components, asking how to theme a page so attention moves across it, building a theme builder on CSS custom properties, or debugging why a component renders unthemed or why a colour sweep misses something.
 ---
 
 # Neodigm 55 UX components
@@ -198,43 +198,71 @@ page while closed, so a form keeps what was typed. Never modal. Opening one clos
 any other. Place it **outside transformed or filtered containers**, which capture
 fixed positioning.
 
-### `<neodigm-icon>` and `<neodigm-acticon>` — icons without a font
+### Icons — pure CSS, `<neodigm-icon>` and `<neodigm-acticon>`
 
-```html
-<neodigm-icon name="search"></neodigm-icon>
-<neodigm-acticon data-n55-theme="brand" data-n55-size="small" icon="settings"
-  label="Settings" data-n55-poptart-click="js-settings"></neodigm-acticon>
-```
-41 built-in Material Symbols (`ICON_NAMES` in the conductor), each a CSS mask over
-`currentColor`. The set is `--n55-icon-<name>` custom properties with the built-in
-shape as fallback, so **add or replace an icon with CSS**, never by editing the
-package: `:root { --n55-icon-rocket: url("data:image/svg+xml,…") }`. An unknown name
-draws nothing and warns once. `<neodigm-icon>` is decorative unless given `label`;
-size is `--n55-icon-size`.
+41 Material Symbols, no icon font. **Only these names exist** — never suggest another
+(no `home`, `menu`, `chevron-right`, `person`):
+`cached`, `chat`, `chat-bubble`, `close`, `close-small`, `dark-mode`, `delete`,
+`document-search`, `download`, `file-export`, `file-open`, `file-present`, `files`,
+`flash-on`, `folder-open`, `fullscreen`, `fullscreen-exit`, `history`, `keep`,
+`light-mode`, `mic`, `mic-off`, `more-horiz`, `more-vert`, `near-me`, `no-sound`,
+`note-stack`, `notifications`, `notifications-unread`, `play-circle`, `search`,
+`send`, `settings`, `stars`, `stop-circle`, `toggle-off`, `toggle-on`, `tune`,
+`upload`, `wifi`, `wifi-off`.
 
-ActIcon is the original's round icon button: `data-n55-size` `pico`…`xlarge`
-(default `xsmall`), any theme (`ghost` is an outline, `disabled` is unfocusable), and
-a real button: focusable, Enter/Space click, named by `label` or else its icon.
-Migrating: drop the Material Symbols font — `<neodigm-icon>dark_mode</neodigm-icon>`
-still works, the text being read as the name.
+Underscores work too (`dark_mode`). For anything else, the user defines it (below).
 
-**Pure CSS, no component** — prefer this when the user wants an icon on an element
-they already have. `icons.css` (subpath `/icons.css`, file `src/icons.css`) defines
-`--n55-icon-<name>` on `:root`:
+**Pure CSS, no JavaScript — prefer this when the user wants an icon on an element
+they already have** (a button, a `::before`, an empty state). `icons.css` defines
+`--n55-icon-<name>` on `:root`, each a data-URI SVG:
 
 ```css
-@import "@machfivetechchicago/machvive-neodigm55-ux/icons.css";
-.btn::before {                       /* recolourable: mask over currentColor */
+@import "@machfivetechchicago/machvive-neodigm55-ux/icons.css";   /* with a bundler */
+```
+```html
+<!-- without one: node_modules, or a CDN pinned to a version -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@machfivetechchicago/machvive-neodigm55-ux@0.1.9/src/icons.css">
+```
+```css
+.btn::before {                       /* recolourable: a mask over currentColor */
   content: ""; display: inline-block; inline-size: 20px; block-size: 20px;
   background-color: currentColor;
-  -webkit-mask: var(--n55-icon-search) center / contain no-repeat;
+  -webkit-mask: var(--n55-icon-search) center / contain no-repeat;   /* keep: older Safari */
   mask: var(--n55-icon-search) center / contain no-repeat;
 }
 .empty { background: var(--n55-icon-folder-open) no-repeat center / 64px; }  /* always black */
 ```
-Or classes: `<span class="n55-icon n55-icon-search"></span>` (`.n55-icon` alone draws
-nothing; size with `--n55-icon-size`). Use the mask, not `background-image`, whenever
-the icon must be coloured: the SVGs are black with no fill of their own.
+Or classes: `<span class="n55-icon n55-icon-search"></span>`, sized with
+`--n55-icon-size` (default 24px). `.n55-icon` alone draws nothing.
+
+- **To colour an icon, use the mask.** `background-image` always draws black: the
+  SVGs have no fill of their own.
+- **CSS icons are invisible to screen readers.** Put the accessible name on the
+  control: `<button aria-label="Search"><span class="n55-icon n55-icon-search"></span></button>`.
+- **Add or replace an icon with CSS, never by editing the package**:
+  `:root { --n55-icon-rocket: url("data:image/svg+xml,…") }`, then
+  `<span class="n55-icon" style="--n55-glyph: var(--n55-icon-rocket)">`. URL-encode
+  the SVG; an unencoded `#` (must be `%23`) ends the image and draws nothing.
+- `--n55-icon-size` is the size setting, never an icon.
+
+**`<neodigm-icon>`** reads the same properties, so an override reaches it too, and it
+falls back to its own copies without the stylesheet. `name="search"`, or the
+original's ligature text (`<neodigm-icon class="material-symbols-outlined">dark_mode</neodigm-icon>`).
+Decorative unless given `label`. With its own `data-n55-theme` it takes that colour
+and is swept. An unknown name draws nothing and warns once in the console.
+
+**`<neodigm-acticon>`** is the original's round icon button:
+
+```html
+<neodigm-acticon data-n55-theme="brand" data-n55-size="small" icon="settings"
+  label="Settings" data-n55-poptart-click="js-settings"></neodigm-acticon>
+```
+`data-n55-size` `pico` 14 · `micro` 18 · `milli`/`xsmall` 24 (default) · `small` 29 ·
+`medium` 35 · `large` 42 · `xlarge` 50. Any theme; `ghost` is an outline, `disabled`
+is unfocusable. A real button: focusable, Enter/Space click, named by `label` or else
+its icon. Migrating: drop the Material Symbols font; the markup still works.
+
+Full guide: the wiki's [Icons](https://github.com/Mach-Five-Group/machvive-neodigm55-ux/wiki/Icons) page.
 
 ## Choreography
 
@@ -296,5 +324,6 @@ possible.
 ## Reference
 
 - [Repository](https://github.com/Mach-Five-Group/machvive-neodigm55-ux) — the README has the full API
+- [Wiki](https://github.com/Mach-Five-Group/machvive-neodigm55-ux/wiki) — including the [Icons](https://github.com/Mach-Five-Group/machvive-neodigm55-ux/wiki/Icons) guide
 - [npm](https://www.npmjs.com/package/@machfivetechchicago/machvive-neodigm55-ux)
 - [Original Neodigm 55](https://github.com/arcanus55/neodigm55) and its [Cheat Sheet](https://github.com/arcanus55/neodigm55/wiki/Cheat-Sheet)

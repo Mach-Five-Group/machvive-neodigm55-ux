@@ -241,19 +241,42 @@ never deletes; a page existing only locally is reported, not removed, because on
 sibling repo that mistake cost a 170-line page. `design/` is gitignored, so none of
 it is committed or shipped.
 
-The wiki itself has no pages yet. GitHub does not create the `.wiki.git` repo until
-the first page is saved through the web UI, so `sync-wiki.sh` cannot clone until then
-— that failure is expected, not a bug.
+To change a page: clone `machvive-neodigm55-ux.wiki.git`, edit and push there, then
+run `design/wiki/sync-wiki.sh --apply` to refresh the mirror. Pages: **Home**, and
+**Icons**, which is the full guide to `icons.css`, `<neodigm-icon>` and ActIcon. When
+the icon set changes, its name table changes too; it is generated from `ICON_NAMES`,
+never typed.
 
 ## Publishing
 
 Releases publish from CI over OIDC. No token exists, and none should be created.
 
 ```bash
-git commit -am "…"                  # npm version refuses a dirty tree
-npm version <patch|minor|major>     # bumps, commits, and creates annotated tag v<x.y.z>
-git push origin main --follow-tags
+npm run sync-icons                  # 1. regenerate src/conductor/icons.js and src/icons.css
+npm test                            # 2. icons.css must match icons.js, among the rest
+git commit -am "…"                  # 3. include both icon files; npm version refuses a dirty tree
+npm version <patch|minor|major>     # 4. checks the icons, then bumps, commits, tags v<x.y.z>
+git push origin main --follow-tags  # 5. the tag is what publishes
 ```
+
+**Step 1 is how `icons.css` gets generated, and the release enforces it.** The icon
+set is added to in `machvive-chat-syncopation`; `npm run sync-icons` copies it into
+both files. `npm version` runs `preversion` first, which is `sync-icons --check`: if
+the icons here are behind syncopation it exits 1 and nothing is bumped. It checks
+rather than writes on purpose: `npm version` commits only `package.json`, so a
+regenerated `icons.css` would be left out of the tagged commit and never published.
+Run step 1, commit, and version again.
+
+**When a sync adds or removes icons, two lists follow it.** The skill names every
+icon (so Claude never suggests one that does not exist), and a test fails until its
+list matches `ICON_NAMES`. The wiki's Icons page has the same table, which no test can
+reach: regenerate it from `ICON_NAMES` and push the wiki. Removing an icon is a
+breaking change for any page that names it.
+
+`--if-present` lets the check pass, with a message, in a checkout without
+syncopation beside it. The suite still guards the other half everywhere, CI
+included: `icons.css` must be exactly what `icons.js` generates. Never edit
+`icons.css` or the ICONS block by hand; the next sync overwrites both.
 
 `--follow-tags` is the part people forget. Pushing the branch alone does nothing —
 `.github/workflows/publish.yml` triggers on `tags: ['v*']`.

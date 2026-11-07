@@ -10,12 +10,19 @@
  *   npm run sync-icons                       # from ../machvive-chat-syncopation-ai
  *   npm run sync-icons -- path/to/icons.js   # from somewhere else
  *   npm run sync-icons -- --check            # exit 1 if out of date, change nothing
+ *   npm run sync-icons -- --check --if-present   # the same, but skip if there is no source
+ *
+ * `npm version` runs the last form first (the `preversion` script), so a
+ * release cannot go out behind syncopation. It checks rather than writes:
+ * `npm version` commits only package.json, so regenerated files would be left
+ * out of the tagged commit. `--if-present` is for a checkout without
+ * syncopation beside it; the suite still checks icons.css against icons.js.
  *
  * The source is read as text and never imported, so nothing in the other
  * repository runs. Only the ICONS block of icons.js is rewritten; the rest of
  * the module is this package's own. icons.css is generated whole.
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const DEFAULT_SOURCE = new URL(
@@ -123,10 +130,20 @@ export function difference(before, after) {
   };
 }
 
-function main(args) {
+/**
+ * The command line. Returns the exit code: 0 done or in step, 1 out of date
+ * under --check. Throws on a source it cannot read or trust.
+ *
+ * @param {string[]} args
+ */
+export function main(args) {
   const check = args.includes('--check');
   const path = args.find((a) => !a.startsWith('--'));
   const source = path ? new URL(path, pathToFileURL(`${process.cwd()}/`)) : DEFAULT_SOURCE;
+  if (args.includes('--if-present') && !existsSync(source)) {
+    console.log(`sync-icons: no source at ${fileURLToPath(source)}, so not checked`);
+    return 0;
+  }
 
   const icons = readIcons(readFileSync(source, 'utf8'));
   const before = readFileSync(TARGET, 'utf8');
