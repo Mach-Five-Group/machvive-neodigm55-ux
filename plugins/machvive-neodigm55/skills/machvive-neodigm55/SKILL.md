@@ -200,15 +200,15 @@ fixed positioning.
 
 ### Icons — pure CSS, `<neodigm-icon>` and `<neodigm-acticon>`
 
-41 Material Symbols, no icon font. **Only these names exist** — never suggest another
+43 Material Symbols, no icon font. **Only these names exist** — never suggest another
 (no `home`, `menu`, `chevron-right`, `person`):
-`cached`, `chat`, `chat-bubble`, `close`, `close-small`, `dark-mode`, `delete`,
-`document-search`, `download`, `file-export`, `file-open`, `file-present`, `files`,
-`flash-on`, `folder-open`, `fullscreen`, `fullscreen-exit`, `history`, `keep`,
-`light-mode`, `mic`, `mic-off`, `more-horiz`, `more-vert`, `near-me`, `no-sound`,
-`note-stack`, `notifications`, `notifications-unread`, `play-circle`, `search`,
-`send`, `settings`, `stars`, `stop-circle`, `toggle-off`, `toggle-on`, `tune`,
-`upload`, `wifi`, `wifi-off`.
+`arrow-drop-down`, `arrow-drop-up`, `cached`, `chat`, `chat-bubble`, `close`,
+`close-small`, `dark-mode`, `delete`, `document-search`, `download`, `file-export`,
+`file-open`, `file-present`, `files`, `flash-on`, `folder-open`, `fullscreen`,
+`fullscreen-exit`, `history`, `keep`, `light-mode`, `mic`, `mic-off`, `more-horiz`,
+`more-vert`, `near-me`, `no-sound`, `note-stack`, `notifications`,
+`notifications-unread`, `play-circle`, `search`, `send`, `settings`, `stars`,
+`stop-circle`, `toggle-off`, `toggle-on`, `tune`, `upload`, `wifi`, `wifi-off`.
 
 Underscores work too (`dark_mode`). For anything else, the user defines it (below).
 
@@ -235,6 +235,9 @@ they already have** (a button, a `::before`, an empty state). `icons.css` define
 Or classes: `<span class="n55-icon n55-icon-search"></span>`, sized with
 `--n55-icon-size` (default 24px). `.n55-icon` alone draws nothing.
 
+- **A two-state caret** is `arrow-drop-down` / `arrow-drop-up`. Switch on state in
+  CSS: `[aria-expanded="true"] .n55-icon { --n55-glyph: var(--n55-icon-arrow-drop-up) }`,
+  or swap `mask-image` the same way on a `::after`.
 - **To colour an icon, use the mask.** `background-image` always draws black: the
   SVGs have no fill of their own.
 - **CSS icons are invisible to screen readers.** Put the accessible name on the

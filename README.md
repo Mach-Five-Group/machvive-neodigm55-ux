@@ -325,7 +325,7 @@ original's round, themed icon button around one.
   label="Settings" data-n55-poptart-click="js-settings"></neodigm-acticon>
 ```
 
-The 41 built-in icons are Google's Material Symbols (Outlined, Apache-2.0), the same
+The 43 built-in icons are Google's Material Symbols (Outlined, Apache-2.0), the same
 set as `machvive-chat-syncopation`. `ICON_NAMES` in the conductor lists them. Each is
 a mask over `currentColor`, so it takes the colour of whatever it sits in, and a
 `<neodigm-icon>` with a `data-n55-theme` of its own takes that theme's colour. Size is
@@ -395,6 +395,39 @@ their own, so this suits a light surface where black is what you want.
 draws nothing. It is `--n55-icon-size` square (default `24px`) and takes `currentColor`.
 These are decorative: give the button or link around them its accessible name.
 
+**A two-state caret.** `arrow-drop-down` and `arrow-drop-up` are a pair, for a
+disclosure, a dropdown or a sortable column:
+
+```css
+/* A two-state caret: down while closed, up while open. No JavaScript beyond
+   whatever already sets aria-expanded on the button. */
+.disclosure::after {
+  content: "";
+  display: inline-block;
+  inline-size: 24px;
+  block-size: 24px;
+  background-color: currentColor;
+  -webkit-mask: var(--n55-icon-arrow-drop-down) center / contain no-repeat;
+  mask: var(--n55-icon-arrow-drop-down) center / contain no-repeat;
+}
+.disclosure[aria-expanded="true"]::after {
+  -webkit-mask-image: var(--n55-icon-arrow-drop-up);
+  mask-image: var(--n55-icon-arrow-drop-up);
+}
+```
+
+With the classes, switch the glyph instead:
+
+```html
+<button class="disclosure" aria-expanded="false">
+  Details <span class="n55-icon n55-icon-arrow-drop-down"></span>
+</button>
+```
+
+```css
+.disclosure[aria-expanded="true"] .n55-icon { --n55-glyph: var(--n55-icon-arrow-drop-up); }
+```
+
 To replace an icon, or add one, define the property after the stylesheet loads:
 
 ```css
@@ -423,7 +456,7 @@ clears WCAG's 3:1 for graphics on every theme.
 **Migrating from the original:**
 - Drop the Material Symbols font. `<neodigm-icon class="material-symbols-outlined">dark_mode</neodigm-icon>`
   still works: the text inside is read as the name, in either spelling.
-- The set has 41 icons, not the font's thousands. Define `--n55-icon-<name>` for any
+- The set has 43 icons, not the font's thousands. Define `--n55-icon-<name>` for any
   other; the warning names the missing one.
 - `data-n55-ampm-theme` is replaced by `color-scheme`, as everywhere in this package.
 
