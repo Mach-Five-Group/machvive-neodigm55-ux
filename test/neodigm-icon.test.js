@@ -43,11 +43,11 @@ beforeEach(() => {
 afterEach(() => { document.body.replaceChildren(); });
 
 describe('the icon set', () => {
-  test('carries 43 icons, sorted and frozen', () => {
-    assert.equal(ICON_NAMES.length, 43);
+  test('carries 44 icons, sorted and frozen', () => {
+    assert.equal(ICON_NAMES.length, 44);
     assert.deepEqual([...ICON_NAMES], [...ICON_NAMES].sort());
     assert.ok(Object.isFrozen(ICONS) && Object.isFrozen(ICON_NAMES));
-    for (const name of ['search', 'close', 'settings', 'dark-mode', 'light-mode', 'arrow-drop-down', 'arrow-drop-up']) {
+    for (const name of ['search', 'close', 'settings', 'dark-mode', 'light-mode', 'arrow-drop-down', 'arrow-drop-up', 'emergency-home']) {
       assert.ok(ICONS[name], name);
     }
   });

@@ -200,11 +200,11 @@ fixed positioning.
 
 ### Icons — pure CSS, `<neodigm-icon>` and `<neodigm-acticon>`
 
-43 Material Symbols, no icon font. **Only these names exist** — never suggest another
+44 Material Symbols, no icon font. **Only these names exist** — never suggest another
 (no `home`, `menu`, `chevron-right`, `person`):
 `arrow-drop-down`, `arrow-drop-up`, `cached`, `chat`, `chat-bubble`, `close`,
-`close-small`, `dark-mode`, `delete`, `document-search`, `download`, `file-export`,
-`file-open`, `file-present`, `files`, `flash-on`, `folder-open`, `fullscreen`,
+`close-small`, `dark-mode`, `delete`, `document-search`, `download`, `emergency-home`,
+`file-export`, `file-open`, `file-present`, `files`, `flash-on`, `folder-open`, `fullscreen`,
 `fullscreen-exit`, `history`, `keep`, `light-mode`, `mic`, `mic-off`, `more-horiz`,
 `more-vert`, `near-me`, `no-sound`, `note-stack`, `notifications`,
 `notifications-unread`, `play-circle`, `search`, `send`, `settings`, `stars`,

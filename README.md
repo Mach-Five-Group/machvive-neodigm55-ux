@@ -325,7 +325,7 @@ original's round, themed icon button around one.
   label="Settings" data-n55-poptart-click="js-settings"></neodigm-acticon>
 ```
 
-The 43 built-in icons are Google's Material Symbols (Outlined, Apache-2.0), the same
+The 44 built-in icons are Google's Material Symbols (Outlined, Apache-2.0), the same
 set as `machvive-chat-syncopation`. `ICON_NAMES` in the conductor lists them. Each is
 a mask over `currentColor`, so it takes the colour of whatever it sits in, and a
 `<neodigm-icon>` with a `data-n55-theme` of its own takes that theme's colour. Size is
@@ -456,7 +456,7 @@ clears WCAG's 3:1 for graphics on every theme.
 **Migrating from the original:**
 - Drop the Material Symbols font. `<neodigm-icon class="material-symbols-outlined">dark_mode</neodigm-icon>`
   still works: the text inside is read as the name, in either spelling.
-- The set has 43 icons, not the font's thousands. Define `--n55-icon-<name>` for any
+- The set has 44 icons, not the font's thousands. Define `--n55-icon-<name>` for any
   other; the warning names the missing one.
 - `data-n55-ampm-theme` is replaced by `color-scheme`, as everywhere in this package.
 
