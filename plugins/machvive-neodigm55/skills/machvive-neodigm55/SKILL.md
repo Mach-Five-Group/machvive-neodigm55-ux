@@ -26,12 +26,14 @@ a worse Shoelace. Suggest `robinTheme` when they want to draw attention somewher
 
 ## Two layers, one contract
 
-**The conductor** (`/conductor`) owns the palette, motion gate, placement maths and
-choreography. It has **no custom elements and never touches `HTMLElement`**, so it
+**The conductor** (`/conductor`) owns the palette, motion gate, placement maths,
+choreography and the effects (`shake`, `countTo`, `typeOn`, `notify`). It has **no custom elements and never touches `HTMLElement`**, so it
 imports in bare Node — a build step, a CI check or a theme builder can use it with no
 DOM. Never add DOM dependencies to it; a test pins this both ways.
 
 **The components** opt in by carrying `data-n55-theme` on their **host**.
+`<neodigm-conductor>` (`/conductor-element`) is the conductor declared in markup: it
+holds no logic, only wires the effect triggers and calls the module.
 
 That attribute is the whole contract, so anything can participate:
 
@@ -56,7 +58,7 @@ import '@machfivetechchicago/machvive-neodigm55-ux/toast';      // one component
 import { robinTheme, installTheme } from '@machfivetechchicago/machvive-neodigm55-ux/conductor';
 ```
 
-Subpaths: `/conductor`, `/toast`, `/marquee`, `/tulip`, `/buffet`, `/side-dish`,
+Subpaths: `/conductor`, `/conductor-element`, `/toast`, `/marquee`, `/tulip`, `/buffet`, `/side-dish`,
 `/sodapop`, `/poptart`, `/icon`, `/acticon`, and the stylesheet `/icons.css`.
 
 Importing a component registers its tag. There is nothing to call.
@@ -295,6 +297,8 @@ notify('Ready', { title, icon });                 // only from a click/key
 - `notify` has no default icon and resolves `'shown'|'denied'|'default'|'unsupported'`.
 - Not ported, use the platform: `isMobile`, `genHash`, `capFirst`, `prettyTime`, `isJSON`, `fAsyncJS`.
 
+Full guide: the wiki's [Conductor effects](https://github.com/Mach-Five-Group/machvive-neodigm55-ux/wiki/Conductor-Effects) page.
+
 ## Choreography
 
 ```js
@@ -315,7 +319,7 @@ sweep but still flashes the tab — that is information, not movement.
 per tab session by default (`{ once: 'page' }` for once per load). It uses the
 original's storage key, so a visitor on a migrated site is not asked twice.
 
-## Five things that break an integration
+## Six things that break an integration
 
 **1. `installTheme()` was never called**, or its selector does not match. Symptom:
 components render unthemed. The selector must match an **ancestor** of the themed
@@ -338,6 +342,11 @@ page opts in with `style="color-scheme: light dark"` or `data-n55-scheme`.
 **5. A Poptart inside a transformed container.** `transform` and `filter` create a
 containing block that captures `position: fixed`, so it lands in the wrong place.
 
+**6. Effect triggers with no `<neodigm-conductor>` on the page.** `data-n55-shake`,
+`data-n55-typeon-click`/`-hover` and `data-n55-notify` are wired by the element, not
+by importing the package. Symptom: clicks do nothing and nothing is logged. Put one
+`<neodigm-conductor>` anywhere in the page; the functions on `/conductor` need none.
+
 ## Browser-only, like all custom elements
 
 Every component evaluates `class extends HTMLElement` at module load, so a static
@@ -355,6 +364,6 @@ possible.
 ## Reference
 
 - [Repository](https://github.com/Mach-Five-Group/machvive-neodigm55-ux) — the README has the full API
-- [Wiki](https://github.com/Mach-Five-Group/machvive-neodigm55-ux/wiki) — including the [Icons](https://github.com/Mach-Five-Group/machvive-neodigm55-ux/wiki/Icons) guide
+- [Wiki](https://github.com/Mach-Five-Group/machvive-neodigm55-ux/wiki) — including the [Icons](https://github.com/Mach-Five-Group/machvive-neodigm55-ux/wiki/Icons) and [Conductor effects](https://github.com/Mach-Five-Group/machvive-neodigm55-ux/wiki/Conductor-Effects) guides
 - [npm](https://www.npmjs.com/package/@machfivetechchicago/machvive-neodigm55-ux)
 - [Original Neodigm 55](https://github.com/arcanus55/neodigm55) and its [Cheat Sheet](https://github.com/arcanus55/neodigm55/wiki/Cheat-Sheet)
