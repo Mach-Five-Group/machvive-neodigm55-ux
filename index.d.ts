@@ -15,4 +15,5 @@ export type { PoptartConfig, PoptartTrigger, PoptartOpenDetail, PoptartCloseDeta
 export { NeodigmIcon, resetIconWarning } from './src/wc/neodigm-icon/neodigm-icon.js';
 export { NeodigmActIcon, ACTICON_SIZES } from './src/wc/neodigm-acticon/neodigm-acticon.js';
 export type { ActIconSize } from './src/wc/neodigm-acticon/neodigm-acticon.js';
+export { NeodigmConductor } from './src/wc/neodigm-conductor/neodigm-conductor.js';
 export * from './src/conductor/index.js';

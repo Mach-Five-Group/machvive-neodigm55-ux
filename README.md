@@ -460,6 +460,71 @@ clears WCAG's 3:1 for graphics on every theme.
   other; the warning names the missing one.
 - `data-n55-ampm-theme` is replaced by `color-scheme`, as everywhere in this package.
 
+## The conductor element: shake, count, type, notify
+
+`<neodigm-conductor>` is the original's `neodigmUtils` effects, in markup. It draws
+nothing: while one is on the page it wires the triggers below, and its methods call
+the conductor module, which also exports each effect for pages that would rather
+write JavaScript.
+
+```html
+<neodigm-conductor></neodigm-conductor>
+
+<button data-n55-shake="#logo">Shake the logo</button>   <!-- empty: shakes itself -->
+<button data-n55-typeon-click='{"q1st": "#tagline", "msg": "Fast|Small|Yours", "mode": "LOOP"}'>Type</button>
+<h2 data-n55-typeon-hover='{"msg": "Hello there"}'>Hover me</h2>
+<button data-n55-notify="Your export is ready" data-n55-notify-title="Exports">Notify me</button>
+```
+
+```js
+import { shake, countTo, typeOn, typeOff, notify }
+  from '@machfivetechchicago/machvive-neodigm55-ux/conductor';
+
+await shake('#logo');                                   // was neodigmUtils.shake(q)
+await countTo('#spend', 4609, { format: new Intl.NumberFormat().format });
+await typeOn('#tagline', 'Fast|Small|Yours', { mode: 'loop', delay: 80, hold: 1500 });
+await typeOff('#tagline');
+await notify('Your export is ready', { title: 'Exports' });  // from a click
+```
+
+| Effect | What it does | Under reduced motion |
+| --- | --- | --- |
+| `shake(target)` | Four 0.2s shakes, from wherever the element stands | nothing |
+| `countTo(target, value)` | Sixteen whole-number steps, 116ms apart, landing on `value` | lands at once |
+| `typeOn(target, msg)` | Types; `\|` separates phrases, erased between. Modes `once`, `loop`, `random`, `off` | the final phrase appears whole |
+| `typeOff(target)` | Erases | empties at once |
+| `notify(msg)` | A system notification, asking permission first | the same |
+
+`target` is a selector, an element or a list; `typeOn` and `typeOff` take the first
+match, as the original's `q1st` did. A trigger themed `disabled` does nothing.
+
+- **Shake an inline element** by giving it `display: inline-block`: a transform does
+  not apply to an inline box.
+- **Typed text is read whole.** While typing, the phrase sits in a visually hidden
+  span and the letters in an `aria-hidden` one, so a screen reader hears each phrase
+  once; when it finishes the element is plain text again. `data-n55-typeon` is the
+  index of the phrase showing, for styling each one.
+- **A typed element collapses when it empties** unless it has a `min-block-size`.
+- **`notify` must run from a click or a key**, or the browser will not ask. It
+  resolves `'shown'`, `'denied'`, `'default'` (dismissed) or `'unsupported'`.
+- **Hover also fires on keyboard focus**, and does not restart text still typing.
+
+**Migrating from the original:**
+- `neodigmUtils.shake(q)` → `shake(q)`. The `shake__an` class and its global CSS are
+  gone; it no longer replaces the element's own `transform`, so a centred element
+  stays centred. Haptics and sound are not wired.
+- `neodigmUtils.countTo(q, n, t)` → `countTo(q, n, { interval: t })`. Steps are now
+  even: the original moved by `round(diff / 16)` and snapped at the end.
+- `neodigmUtils.typeOn({q1st, msg, uniqueDelay, mode})` →
+  `typeOn(q1st, msg, { delay: uniqueDelay, mode })`. The trigger attributes take the
+  original's JSON unchanged. Phrases now type, hold (`hold`, default 1500ms), erase
+  and type in sequence, where the original's erase raced the typing; and the
+  element's `height` is no longer pinned inline.
+- `neodigmUtils.messageNotification(msg, icon, title)` → `notify(msg, { icon, title })`.
+  There is no default icon: the original fetched a GitHub avatar for each one.
+- The other utils (`isMobile`, `genHash`, `capFirst`, `prettyTime`, `isJSON`,
+  `fAsyncJS`…) are not ported; the platform covers each.
+
 ## What changed in the port
 
 | | Original | Here |
@@ -490,6 +555,7 @@ import in turn, and the `part` names it exposes for `::part()` styling:
 | `neodigm-poptart` | theme, anchor, motion | popup |
 | `neodigm-icon` | theme, icons | glyph |
 | `neodigm-acticon` | theme, icons | icon |
+| `neodigm-conductor` | effects, motion, notify, theme | — |
 
 ActIcon renders `<neodigm-icon>`, so vendoring it means vendoring that file too.
 

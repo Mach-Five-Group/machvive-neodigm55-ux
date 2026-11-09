@@ -1,6 +1,6 @@
 ---
 name: machvive-neodigm55
-description: Build pages with the Neodigm 55 UX web components (@machfivetechchicago/machvive-neodigm55-ux) — a page-level choreographer that sweeps colour across every themed element, plus toast, marquee, tooltip, menu, popup, panel, popover, icon and icon-button components. Use this whenever the user mentions Neodigm, neodigm55, machvive UX, robinTheme, data-n55-theme, or any of the tags neodigm-toast, neodigm-marquee, neodigm-tulip, neodigm-buffet, neodigm-sodapop, neodigm-side-dish, neodigm-poptart, neodigm-icon or neodigm-acticon, or wants an icon from icons.css or --n55-icon-* — even when they don't name the package. Also use when someone is porting the original Neodigm 55 IIFE library to web components, asking how to theme a page so attention moves across it, building a theme builder on CSS custom properties, or debugging why a component renders unthemed or why a colour sweep misses something.
+description: Build pages with the Neodigm 55 UX web components (@machfivetechchicago/machvive-neodigm55-ux) — a page-level choreographer that sweeps colour across every themed element, plus toast, marquee, tooltip, menu, popup, panel, popover, icon and icon-button components, and effects (shake, countTo, typeOn, notify). Use this whenever the user mentions Neodigm, neodigm55, machvive UX, robinTheme, data-n55-theme, or any of the tags neodigm-toast, neodigm-marquee, neodigm-tulip, neodigm-buffet, neodigm-sodapop, neodigm-side-dish, neodigm-poptart, neodigm-icon, neodigm-acticon or neodigm-conductor, or wants an icon from icons.css or --n55-icon-*, or wants to shake an element, count a number up, type text on, or show a system notification the Neodigm way (neodigmUtils, data-n55-shake, data-n55-typeon) — even when they don't name the package. Also use when someone is porting the original Neodigm 55 IIFE library to web components, asking how to theme a page so attention moves across it, building a theme builder on CSS custom properties, or debugging why a component renders unthemed or why a colour sweep misses something.
 ---
 
 # Neodigm 55 UX components
@@ -266,6 +266,34 @@ is unfocusable. A real button: focusable, Enter/Space click, named by `label` or
 its icon. Migrating: drop the Material Symbols font; the markup still works.
 
 Full guide: the wiki's [Icons](https://github.com/Mach-Five-Group/machvive-neodigm55-ux/wiki/Icons) page.
+
+### `<neodigm-conductor>` — shake, count, type, notify, from markup
+
+The original's `neodigmUtils` effects. Draws nothing; while one is on the page it
+wires the triggers. Import `/conductor-element` (or the bulk entry). The same effects
+are plain functions on `/conductor`.
+
+```html
+<neodigm-conductor></neodigm-conductor>
+<button data-n55-shake="#logo">Shake</button>            <!-- empty value: shakes itself -->
+<button data-n55-typeon-click='{"q1st":"#tag","msg":"Fast|Small|Yours","uniqueDelay":80,"mode":"LOOP"}'>Type</button>
+<h2 data-n55-typeon-hover="Hello there">Hover me</h2>   <!-- plain string: types into itself -->
+<button data-n55-notify="Export ready" data-n55-notify-title="Exports">Notify</button>
+```
+```js
+import { shake, countTo, typeOn, typeOff, notify } from '…/conductor';
+shake('#logo');                                   // Promise<number shaken>
+countTo('#spend', 4609, { interval: 116, steps: 16, format: new Intl.NumberFormat().format });
+typeOn('#tag', 'a|b', { mode: 'once'|'loop'|'random'|'off', delay: 80, hold: 1500 });
+notify('Ready', { title, icon });                 // only from a click/key
+```
+- `typeOn`/`typeOff` act on the **first** match; `shake`/`countTo` on every match.
+- Reduced motion: shake does nothing, countTo lands, typeOn shows the final phrase.
+- Shaking an **inline** element does nothing visible: it needs `display: inline-block`.
+- A typed element collapses when empty; give it `min-block-size`.
+- `data-n55-typeon` on the target is the showing phrase's index, for per-phrase CSS.
+- `notify` has no default icon and resolves `'shown'|'denied'|'default'|'unsupported'`.
+- Not ported, use the platform: `isMobile`, `genHash`, `capFirst`, `prettyTime`, `isJSON`, `fAsyncJS`.
 
 ## Choreography
 

@@ -16,6 +16,7 @@ import { NeodigmSodaPop, readPopup } from './src/wc/neodigm-sodapop/neodigm-soda
 import { NeodigmPoptart, readPoptart, triggerFor } from './src/wc/neodigm-poptart/neodigm-poptart.js';
 import { NeodigmIcon, resetIconWarning } from './src/wc/neodigm-icon/neodigm-icon.js';
 import { NeodigmActIcon, ACTICON_SIZES } from './src/wc/neodigm-acticon/neodigm-acticon.js';
+import { NeodigmConductor } from './src/wc/neodigm-conductor/neodigm-conductor.js';
 
 export { NeodigmToast, DEFAULT_DURATION };
 export { NeodigmMarquee, DEFAULT_SPEED, parseRuns, plainText };
@@ -26,6 +27,7 @@ export { NeodigmSodaPop, readPopup };
 export { NeodigmPoptart, readPoptart, triggerFor };
 export { NeodigmIcon, resetIconWarning };
 export { NeodigmActIcon, ACTICON_SIZES };
+export { NeodigmConductor };
 export {
   THEMES, THEME_NAMES, OPT_OUT, THEME_ATTR, PULSE_ATTR,
   INK_DARK, INK_LIGHT, contrast, inkFor, WCAG_AA, legibleFor, NEUTRALS, SCHEME_ATTR,
@@ -33,5 +35,7 @@ export {
   motionAllowed, setMotionAllowed, pause, play, onMotionChange, resetMotion,
   robinTheme, pulseTheme, flashTitle, resetTitle,
   place, rectOf, SIDES, ALIGNS, onExitIntent, EXIT_KEY,
-  ICONS, ICON_NAMES, iconName, iconCss
+  ICONS, ICON_NAMES, iconName, iconCss,
+  shake, countTo, typeOn, typeOff, isTyping,
+  SHAKE_KEYFRAMES, SHAKE_TIMING, COUNT_DEFAULTS, TYPE_DEFAULTS, TYPE_MODES, notify
 } from './src/conductor/index.js';

@@ -192,7 +192,8 @@ describe('the README\'s vendoring table', () => {
     .filter(Boolean)
     .map(([, tag, mods, parts]) => [tag, {
       modules: mods.split(',').map((m) => m.trim()).sort(),
-      parts: parts.split(',').map((p) => p.trim()).sort()
+      // "—" for a component with nothing to style.
+      parts: parts.trim() === '—' ? [] : parts.split(',').map((p) => p.trim()).sort()
     }]));
 
   /** Conductor modules a file needs, following the conductor's own imports. */

@@ -164,6 +164,9 @@ Do not "restore" any of these. Each was verified against
 | Tulip bound hover only, and bailed out entirely on mobile | hover, focus, Escape, `openFor()` | The tip was unreachable without a pointer. |
 | Tulip positioned by inline offsets from a fixed constant | shared `place()` in the conductor, plus `offsetX`/`offsetY` | Same rule as the original: the declared side is final. **Never add fit detection, flipping or clamping** — whether a tip fits is the designer's call, made with the offsets. An earlier version of this port flipped sides near viewport edges and overrode declared positions. |
 | Poptart `top` subtracted the trigger's height twice; `left`/`right` centred, then shifted by the trigger's width | `place()` with a 10px gap above and below, flush beside | Its `top` landed a trigger-height too high, and beside the trigger it sat flush only when exactly as wide as the trigger. Offsets that pages added to compensate are now wrong, and the README says so. |
+| `neodigmUtils.shake` added a `shake__an` class with global keyframes | `el.animate(…, { composite: 'add' })` in the conductor | The keyframes replaced the element's own `transform`: a centred element jumped 31px while it shook (measured in Chrome). A class also cannot reach light DOM from a shadow root. |
+| `typeOn` started erasing a phrase while still typing its padding, and pinned `height` inline | type, hold, erase, in sequence; no inline height | The erase was timed from the text's length and raced the typing; the pinned height outlived the text it was measured for. Typed letters are `aria-hidden`, with the whole phrase in a visually hidden span. |
+| `countTo` moved by `round(diff / 16)` and snapped | true sixteenths | A difference under 8 moved 0 per step and jumped on the last; larger ones overshot. |
 | `// TODO test OS/UA motion mq` above `robinTheme` | `prefers-reduced-motion` honoured throughout | Suppressed motion still applies end state and still flashes the tab — that is information, not movement. |
 
 ## Testing
@@ -317,7 +320,8 @@ package does. Getting that one publish out cost three opaque failures:
 
 ## Where this is going
 
-Ported so far: the conductor, `<neodigm-toast>`, `<neodigm-marquee>`,
+Ported so far: the conductor (with `neodigmUtils`' shake, countTo, typeOn and
+messageNotification, and `<neodigm-conductor>` to declare them), `<neodigm-toast>`, `<neodigm-marquee>`,
 `<neodigm-tulip>`, `<neodigm-sodapop>`, `<neodigm-poptart>`, `<neodigm-acticon>`
 (with `<neodigm-icon>`, which replaces the Material Symbols font). Built new, with no original to port: `<neodigm-buffet>`, a
 two-level menu that takes `m5t-primary-nav`'s metadata unchanged and themes as
@@ -334,12 +338,15 @@ never computed from the viewport. Unlike Tulip and SodaPop, each Poptart is its 
 element and keeps its content in the page while closed. A form inside it keeping
 its values is the original's documented behaviour.
 
-Two decisions deliberately deferred:
+**`<neodigm-conductor>` exists as the declarative facade**, and holds no logic: while
+connected it wires `data-n55-shake`, `data-n55-typeon-click`/`-hover` and
+`data-n55-notify` (refcounted per document, so any number are harmless), and its
+methods call `effects.js` and `notify.js` in the conductor. Its subpath is
+`/conductor-element`, because `/conductor` is the headless module. Choreography
+attributes (`robin="8s"`) are the obvious next addition and belong on it, still
+calling the engine rather than holding timers of their own.
 
-**`<neodigm-conductor>` as a declarative facade.** The conductor stays a module —
-that is what keeps it headless — but Neodigm is declarative to its core, and a page
-should be able to write `<neodigm-conductor robin="8s">` rather than JavaScript. The
-element would hold no logic of its own: read attributes, call the engine.
+One decision deliberately deferred:
 
 **A page-level theme builder.** Now cheap, because the palette is already CSS custom
 properties: a UI that writes `--n55-*` to `:root` and exports a stylesheet or token
