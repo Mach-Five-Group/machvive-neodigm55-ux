@@ -573,7 +573,8 @@ framework, no runtime dependencies — the files published are the files that ru
 
 ## More from MachFiveTech
 
-Everything we publish is listed at **[npmx.dev/~machfivetech](https://npmx.dev/~machfivetech)**:
+Everything we publish is listed at **[npmx.dev/~machfivetech](https://npmx.dev/~machfivetech)**, or on
+[npm](https://www.npmjs.com/~machfivetech) directly:
 this package, [machvive-webmcp-ai](https://www.npmjs.com/package/@machfivetechchicago/machvive-webmcp-ai)
 for making a page callable by an AI agent, and
 [machvive-chat-syncopation-ai](https://www.npmjs.com/package/@machfivetechchicago/machvive-chat-syncopation-ai)
