@@ -571,6 +571,14 @@ the conductor does nothing until called.
 Anywhere `customElements`, Shadow DOM and CSS custom properties work. No build step, no
 framework, no runtime dependencies — the files published are the files that run.
 
+## More from MachFiveTech
+
+Everything we publish is listed at **[npmx.dev/~machfivetech](https://npmx.dev/~machfivetech)**:
+this package, [machvive-webmcp-ai](https://www.npmjs.com/package/@machfivetechchicago/machvive-webmcp-ai)
+for making a page callable by an AI agent, and
+[machvive-chat-syncopation-ai](https://www.npmjs.com/package/@machfivetechchicago/machvive-chat-syncopation-ai)
+for building chat surfaces. All three are dependency-free web components.
+
 ## Licence
 
 [Apache-2.0](LICENSE) © MachFiveTech Chicago. Ported from
