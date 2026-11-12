@@ -202,9 +202,9 @@ fixed positioning.
 
 ### Icons — pure CSS, `<neodigm-icon>` and `<neodigm-acticon>`
 
-44 Material Symbols, no icon font. **Only these names exist** — never suggest another
+45 Material Symbols, no icon font. **Only these names exist** — never suggest another
 (no `home`, `menu`, `chevron-right`, `person`):
-`arrow-drop-down`, `arrow-drop-up`, `cached`, `chat`, `chat-bubble`, `close`,
+`arrow-drop-down`, `arrow-drop-up`, `cached`, `casino`, `chat`, `chat-bubble`, `close`,
 `close-small`, `dark-mode`, `delete`, `document-search`, `download`, `emergency-home`,
 `file-export`, `file-open`, `file-present`, `files`, `flash-on`, `folder-open`, `fullscreen`,
 `fullscreen-exit`, `history`, `keep`, `light-mode`, `mic`, `mic-off`, `more-horiz`,
@@ -212,7 +212,8 @@ fixed positioning.
 `notifications-unread`, `play-circle`, `search`, `send`, `settings`, `stars`,
 `stop-circle`, `toggle-off`, `toggle-on`, `tune`, `upload`, `wifi`, `wifi-off`.
 
-Underscores work too (`dark_mode`). For anything else, the user defines it (below).
+Underscores work too (`dark_mode`). Material names an icon by its use, not its look: the
+dice is `casino`. For anything else, the user defines it (below).
 
 **Pure CSS, no JavaScript — prefer this when the user wants an icon on an element
 they already have** (a button, a `::before`, an empty state). `icons.css` defines
